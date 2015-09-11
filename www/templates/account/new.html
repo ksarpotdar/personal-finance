@@ -1,0 +1,30 @@
+<ion-view view-title="New Account">
+  <ion-content class="padding">
+    <div class="list card">
+      <div class="item item-body">
+        <div>
+          <form ng-submit="new.submit()">
+            <label class="item item-input">
+              <input type='text' ng-model='new.username' placeholder="email" autofocus>
+            </label>
+            
+            <label class="item item-input">
+              <input type='text' ng-model='new.password' placeholder="password">
+            </label>
+            <div class='padding'>
+              <button type='submit' pf-spinner-button='new.loading' class='button button-balanced'>
+                New Account
+              </button>
+            </div>
+            <div class='padding'>
+              <a ui-sref='account.login' class='button'>
+                Login
+                </a>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </ion-content>
+</ion-view>

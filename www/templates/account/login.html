@@ -1,0 +1,36 @@
+<!--<ion-view view-title="{{chat.name}}">
+  <ion-content class="padding">
+    <img ng-src="{{chat.face}}" style="width: 64px; height: 64px">
+    <p>
+      {{chat.lastText}}
+    </p>
+  </ion-content>
+</ion-view>-->
+
+<ion-view view-title="Login">
+  <ion-content class="padding">
+    <div class="list card">
+      <div class="item item-divider">Login</div>
+      <div class="item item-body">
+        <div>
+          <form ng-submit="login.submit()">
+            <label class="item item-input">
+              <input type='text' ng-model='login.username' placeholder="firstname">
+            </label>
+            <div class='padding'>
+              <button type='submit' pf-spinner-button='login.loading' class='button button-balanced'>
+                Login
+              </button>
+            </div>
+            <div class='padding'>
+              <a ui-sref='account.new' class='button button-balanced'>
+                New Account
+                </a>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </ion-content>
+</ion-view>

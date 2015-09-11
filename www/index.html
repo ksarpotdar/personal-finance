@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <title></title>
+  
+    <link href="css/ionic.app.css" rel="stylesheet">
+
+    <!--<link href="css/ionicons.css" rel="stylesheet">-->
+    <script src="lib/firebase/firebase-debug.js"></script>
+    
+    <script src="lib/moment/moment.js"></script>
+    <script src="lib/lodash/lodash.js"></script>
+    <script src="lib/ionic/js/ionic.bundle.js"></script>
+    
+    <script src="cordova.js"></script>
+    
+    <script src="lib/angularfire/dist/angularfire.js"></script>
+    
+    <script src="js/constants.js"></script>
+    
+    <script src="js/services/datacontext.module.js"></script>
+    <script src="js/services/auth.service.js"></script>
+    <script src="js/services/transactions.datacontext.js"></script>
+    <script src="js/services/category.datacontext.js"></script>
+    
+    
+    <script src="js/common-directives/common-directives.module.js"></script>
+    <script src="js/common-directives/pfSpinnerButton.directive.js"></script>
+        
+    <script src="js/account/account.module.js"></script>
+    <script src="js/account/account.controllers.js"></script>
+    
+    <script src="js/dashboard/dashboard.module.js"></script>
+    <script src="js/dashboard/dashboard.controller.js"></script>
+    <script src="js/dashboard/transaction.controller.js"></script>
+
+    <script src="js/app.js"></script>
+    <script src="js/config.js"></script>
+  </head>
+  
+  <body ng-app="pf">
+    <!--
+      The nav bar that will be updated as we navigate between views.
+    -->
+    <ion-nav-bar class="bar-stable">
+      <ion-nav-back-button>
+      </ion-nav-back-button>
+    </ion-nav-bar>
+    <!--
+      The views will be rendered in the <ion-nav-view> directive below
+      Templates are in the /templates folder (but you could also
+      have templates inline in this html file if you'd like).
+    -->
+    <ion-nav-view></ion-nav-view>
+  </body>
+</html>
