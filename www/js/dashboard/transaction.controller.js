@@ -23,7 +23,6 @@
     }
 
     function testCreate() {
-      ///categoriesDatacontext.activate(user);
       categoriesDatacontext
         .update(self.categories[0].$id, 'some category WOHOO', CONST.TransactionType.Income)
         .then(function (result) {

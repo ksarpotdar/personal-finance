@@ -25,7 +25,7 @@
 				.$loaded()
 				.then(function (data) {
 					console.log('Categories loaded: ', data);
-				});
+				});;
 			
 			//var categoriesArr = $firebaseArray(ref.child('category'));
 			

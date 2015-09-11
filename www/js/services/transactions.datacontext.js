@@ -3,50 +3,32 @@
 (function () {
 	angular.module('pf.datacontext').factory('transactionsDatacontext', transactionsDatacontext);
 
-	transactionsDatacontext.$inject = ['$q', '$timeout', 'CONST'];
-	function transactionsDatacontext($q, $timeout, CONST) {
-		var transactions = [];
+	transactionsDatacontext.$inject = ['$q', '$timeout', '$window', '$firebaseArray', 'Auth', 'CONST'];
+	function transactionsDatacontext($q, $timeout, $window, $firebaseArray, Auth, CONST) {
+		var ref = new $window.Firebase(CONST.FirebaseUrl);
+		var user = Auth.resolveUser();
+		var categoryRef = ref.child('profile').child(user.uid).child('category');
+		var transactions = $firebaseArray(categoryRef);
+
 
 		_activate();
 
 		return {
 			list: getTransactions,
-			single: getSingle,
+			single: _getById,
 			add: add,
-			update: update
+			update: update,
+			remove: remove,
 		};
 
 
 		function _activate() {
-			console.log('TODO: load data from Firebase');
-			transactions.push({
-				type: CONST.TransactionType.Expense,
-				amount: 123,
-				currency: '$',
-				category: 'Some cat',
-				date: moment().startOf('day')
-			});
-			transactions.push({
-				type: CONST.TransactionType.Income,
-				amount: 321,
-				currency: '$',
-				category: 'Other cat',
-				date: moment().add(-1, 'day').startOf('day')
-			});
-			transactions.push({
-				type: CONST.TransactionType.Expense,
-				amount: 3,
-				currency: '$',
-				category: 'Some cat',
-				date: moment().add(-2, 'day').startOf('day')
-			});
-			transactions.push({
-				type: CONST.TransactionType.Expense,
-				amount: 17,
-				currency: '$',
-				category: 'Facebook',
-				date: moment().add(-2, 'day').startOf('day')
-			});
+			transactions
+				.$loaded()
+				.then(function (data) {
+					console.log('Transactions loaded: ', data);
+				});;
+
 
 			transactions.forEach(function (t) {
 				t.amountSigned = function () {
@@ -55,46 +37,39 @@
 			});
 		}
 
-		function getSingle(transactionId) {
-			console.info('TODO: if transaction doesn"t exist locally, we should try to find it in firebase');
-			var deferred = $q.defer();
-
-			$timeout(function () {
-				var transaction = _.findWhere(transactions, { id: transactionId });
-				deferred.resolve(transaction || {
-					type: CONST.TransactionType.Expense,
-					amount: 17,
-					currency: '$',
-					category: 'Facebook FAKE',
-					date: moment().add(-2, 'day').startOf('day')
-				});
-			}, 500);
-
-			return deferred.promise;
-		}
-
 		function getTransactions() {
-			console.info('TODO: add filters for transactions - when should we refresh from Firebase ?')
-			return transactions;
+			return transactions.$loaded();
 		}
 
 		function add(type, amount, category, date, currency) {
-			transactions.push({
+			var newTransaction = {
 				type: type,
 				amount: amount,
-				category: category,
-				date: date,
-				currency: currency
-			});
-			console.log('TODO : save to firebase - return promise with transaction id');
+				category: category.$id,
+				date: date
+			};
+			
+			return transactions.$add(newTransaction);
 		}
 
-		function update(type, amount, category, date) {
-			console.log('TODO : update to firebase - return promise');
-		}
+		function update(id, amount, type, category) {
+			var transaction = _getById(id);
+			if (!transaction) return null;
 
-		function remove(transactionId) {
-			console.log('TODO : remove from firebase - return promise');
+			transaction.amount = name;
+			transaction.type = type;
+			transaction.category = category.$id;
+			
+			return transactions.$save(transaction);
+		}
+		
+		function remove(id) {
+			var transaction = _getById(id);
+			return transactions.$remove(transaction);
+		}
+		
+		function _getById(id) {
+			return _.findWhere(transactions, { $id: id });
 		}
 	}
 })();
