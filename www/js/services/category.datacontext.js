@@ -7,17 +7,43 @@
 	function categoriesDatacontext($q, $timeout, $window, $firebaseArray, Auth, CONST) {
 		var ref = new $window.Firebase(CONST.FirebaseUrl);
 		var user = Auth.resolveUser();
-		var categoryRef = ref.child('profile').child(user.uid).child('category');
-		var categoriesArr = $firebaseArray(categoryRef);
+		var categoryRef = ref.child('profile').child(user.uid).child('categories');
+		var categoriesArr = _createCategoryFirebaseArray()(categoryRef);
+
+		function _createCategoryFirebaseArray() {
+			return $firebaseArray.$extend({
+				$$added: function (snap) {
+					var rec = $firebaseArray.prototype.$$added.call(this, snap);
+
+
+					rec.refreshSum = function (start, end) {
+						var start = moment().add(-10, 'days').unix();
+						var end = moment().unix();
+						rec.sum = 0;
+						
+						var categSumRef = categoryRef.child(rec.$id).child('transactions').orderByChild('date').startAt(start).endAt(end);
+						categSumRef.on('child_added', function (snapshot) {
+							console.log(snapshot.key());
+							var data = snapshot.val();
+							rec.sum += data.amount;
+						});						
+					}
+					return rec;
+				}
+			});
+		}
 
 		_activate();
 
 		return {
 			list: getCategories,
+			sumByCategory: sumByCategory,
 			get: _getById,
 			add: add,
+			addTransactionToCategory: addTransactionToCategory,
 			update: update,
-			categoryExists: categoryExists			
+			categoryExists: categoryExists,
+			categoryRef: categoryRef
 		};
 
 		function _activate(user) {
@@ -161,6 +187,32 @@
 			// });
 		}
 
+		function sumByCategory() {
+			// var categoryTransactionCache = {};
+			// var start = moment().add(-10, 'days').unix();
+			// var end = moment().unix();
+
+			// for (var i = 0; i < categoriesArr.length; i++) {
+			// 	var categ = categoriesArr[i];
+
+			// 	categoryTransactionCache[categ.$id] = categoryRef.child(categ.$id).child('transactions').orderByChild('date').startAt(start).endAt(end);
+			// 	categoryTransactionCache[categ.$id].on('value', function (snapshot) {
+			// 		console.log(snapshot.val())
+			// 	});
+			// }
+			
+			for (var i = 0; i < categoriesArr.length; i++) {
+				var categ = categoriesArr[i];
+				categ.refreshSum();
+			}
+			
+			$timeout(function(){
+				var r = categoriesArr[0];
+				console.log(r);
+			}, 1000);
+
+		}
+
 		function getCategories() {
 			return categoriesArr.$loaded();
 		}
@@ -188,6 +240,16 @@
 
 			return deferred.promise;
 		}
+		
+		//link the category with a transaction
+		function addTransactionToCategory(category, transactionKey, transaction) {
+			var categoryTransactionRef = categoryRef.child(category.$id).child('transactions');
+			categoryTransactionRef.child(transactionKey)
+				.setWithPriority({
+					amount: transaction.amount,
+					date: transaction.date
+				}, transaction.date);
+		}
 
 		function update(id, name, type) {
 			var category = _getById(id);
@@ -202,7 +264,7 @@
 			var category = _getById(id);
 			return categoriesArr.$remove(category);
 		}
-		
+
 		function _getByName(name) {
 			var lowerName = name.toLowerCase();
 			var category = _.find(categoriesArr, function (c) { return name.toLowerCase() === lowerName; });

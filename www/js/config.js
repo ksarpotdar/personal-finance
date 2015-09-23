@@ -2,6 +2,15 @@
 
 (function () {
   angular.module('pf')
+    .config(['$provide', function ($provide) {
+      $provide.decorator('$locale', ['$delegate', function ($delegate) {
+        if ($delegate.id == 'en-us') {
+          $delegate.NUMBER_FORMATS.PATTERNS[1].negPre = '-\u00A4';
+          $delegate.NUMBER_FORMATS.PATTERNS[1].negSuf = '';
+        }
+        return $delegate;
+      }]);
+    }])
     .config(function ($stateProvider, $urlRouterProvider) {
 
       $stateProvider
@@ -59,7 +68,7 @@
         .state('transaction.add', {
           url: '/add/:transactionType',
           controller: 'TransactionCtrl as tran',
-          templateUrl: 'templates/transaction.html',
+          templateUrl: 'templates/transactions/edit.html',
           resolve: {
             transaction: function ($stateParams) {
               return {
@@ -75,7 +84,7 @@
         .state('transaction.edit', {
           url: '/edit/:id',
           controller: 'TransactionCtrl as tran',
-          templateUrl: 'templates/transaction.html',
+          templateUrl: 'templates/transactions/edit.html',
           resolve: {
             transaction: function ($stateParams, transactionDatacontext) {
               var transactionId = $stateParams.id;

@@ -7737,3 +7737,17 @@ ion-spinner svg {
 .full-width {
   width: 100%;
   max-width: 100%; }
+
+.transaction-item .item-content {
+  padding: 8px 24px 8px 8px; }
+.transaction-item .transaction-amount {
+  float: right; }
+.transaction-item .transaction-details {
+  line-height: 39px; }
+.transaction-item .thumbnail-date {
+  line-height: 39px;
+  width: 55px;
+  height: 100%;
+  float: left;
+  padding-right: 10px;
+  text-align: center; }

@@ -1,0 +1,34 @@
+<ion-view view-title="Transaction">
+  <ion-content>
+    <ionic-datepicker input-obj="tran.datepickerObject">
+      <button class="button button-block button-positive">{{tran.date | pfMomFilter:"DD MMMM YYYY"}}</button>
+    </ionic-datepicker>
+    <form name="transactionForm" novalidate="" ng-submit="tran.createTransaction(transactionForm)">
+      <p>
+        <label class="transaction item-input">
+          <span class="input-label">Amount</span>
+          <input type="number" name="amount" ng-model="tran.amount" max-length="10">
+        </label>
+      </p>
+
+      <p>
+        <label class="item item-input item-select">
+          <span class="input-label">
+        Category
+      </span>
+          <select ng-options="cat as cat.name for cat in tran.categories track by cat.$id" ng-model="tran.selectedCategory">
+          </select>
+        </label>
+      </p>
+
+      <p>
+        <label class="item item-input item-input">
+          <input type="text" ng-model="tran.note" max-length="1000" placeholder="Note">
+        </label>
+      </p>
+
+      <button type="submit" class="button button-block" ng-class="{'button-balanced': tran.isIncome, 'button-assertive': tran.isExpense}">{{tran.buttonText}}</button>
+
+    </form>
+  </ion-content>
+</ion-view>

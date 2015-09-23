@@ -15,24 +15,28 @@
     var self = this;
     this.currentSold = 0;
     this.selectedTransactionType = CONST.TransactionType.Expense;
-    this.transactions = transactionsDatacontext.list();
-    this.transactionModel = {
-      amount: 0,
-      category: '',
-      currency: '$',
-      date: moment()
-    };
+    this.transactions = [];
+    this.expenseTransactions = [];
+    this.incomeTransactions = [];
 
     this.addTransaction = addTransaction;
 
+    activate();
+    function activate() {
+      transactionsDatacontext.list().then(function (result) {
+        self.expenseTransactions = result;
+        self.incomeTransactions = result;
+        self.transactions = result;
+      });
+    }
 
-    _refreshTransactionCollections();
-    _refreshCurrentSold();
+    // _refreshTransactionCollections();
+    // _refreshCurrentSold();
 
     function addTransaction() {
-      var newTransaction = transactionsDatacontext.add({});
-      _refreshTransactionCollections();
-      _refreshCurrentSold(newTransaction);
+      // var newTransaction = transactionsDatacontext.add({});
+      // _refreshTransactionCollections();
+      // _refreshCurrentSold(newTransaction);
     }
 
 

@@ -37,6 +37,7 @@
 
     function login() {
       self.loading = true;
+      self.password = 'asdf';
       Auth.login(self.username, self.password).then(function () {
         self.loading = false;
         _toDashboard();

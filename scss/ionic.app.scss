@@ -69,3 +69,26 @@ ion-spinner svg{
 	width: 100%;
 	max-width: 100%;
 }
+
+.transaction-item{
+		
+	.item-content{
+		padding: 8px 24px 8px 8px;
+	}
+	
+	.transaction-amount {
+		float:right;
+	}
+	.transaction-details{
+		line-height:39px;
+	}
+	
+	.thumbnail-date{
+		line-height:39px;
+		width: 55px;
+		height: 100%;
+		float: left;
+		padding-right: 10px;
+		text-align: center;
+	}
+}
