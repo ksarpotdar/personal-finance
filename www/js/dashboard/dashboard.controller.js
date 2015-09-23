@@ -10,8 +10,8 @@
   //});
   
   
-  DashboardCtrl.$inject = ['CONST', 'transactionsDatacontext']
-  function DashboardCtrl(CONST, transactionsDatacontext) {
+  DashboardCtrl.$inject = ['$state', 'CONST', 'transactionsDatacontext']
+  function DashboardCtrl($state, CONST, transactionsDatacontext) {
     var self = this;
     this.currentSold = 0;
     this.selectedTransactionType = CONST.TransactionType.Expense;
@@ -20,6 +20,8 @@
     this.incomeTransactions = [];
 
     this.addTransaction = addTransaction;
+    this.editTransaction = editTransaction;
+    this.deleteTransaction = deleteTransaction;
 
     activate();
     function activate() {
@@ -32,6 +34,15 @@
 
     // _refreshTransactionCollections();
     // _refreshCurrentSold();
+
+    function editTransaction(transaction) {
+      // $state.go('transaction.edit', { id: transaction.$id });
+      $state.go('transaction.edit', { id: transaction.$id });
+    }
+
+    function deleteTransaction($index) {
+
+    }
 
     function addTransaction() {
       // var newTransaction = transactionsDatacontext.add({});

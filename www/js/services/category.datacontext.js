@@ -9,30 +9,8 @@
 		var user = Auth.resolveUser();
 		var categoryRef = ref.child('profile').child(user.uid).child('categories');
 		var categoriesArr = _createCategoryFirebaseArray()(categoryRef);
-
-		function _createCategoryFirebaseArray() {
-			return $firebaseArray.$extend({
-				$$added: function (snap) {
-					var rec = $firebaseArray.prototype.$$added.call(this, snap);
-
-
-					rec.refreshSum = function (start, end) {
-						var start = moment().add(-10, 'days').unix();
-						var end = moment().unix();
-						rec.sum = 0;
-						
-						var categSumRef = categoryRef.child(rec.$id).child('transactions').orderByChild('date').startAt(start).endAt(end);
-						categSumRef.on('child_added', function (snapshot) {
-							console.log(snapshot.key());
-							var data = snapshot.val();
-							rec.sum += data.amount;
-						});						
-					}
-					return rec;
-				}
-			});
-		}
-
+		var _categoriesLoaded = false;
+		
 		_activate();
 
 		return {
@@ -51,6 +29,7 @@
 				.$loaded()
 				.then(function (data) {
 					console.log('Categories loaded: ', data);
+					_categoriesLoaded = true;
 				});
 			
 			//var categoriesArr = $firebaseArray(ref.child('category'));
@@ -261,8 +240,12 @@
 		}
 
 		function remove(id) {
-			var category = _getById(id);
-			return categoriesArr.$remove(category);
+			return _getById(id).then(function(category){
+				if(!category){
+					return null;
+				}
+				return categoriesArr.$remove(category);
+			});			
 		}
 
 		function _getByName(name) {
@@ -272,7 +255,43 @@
 		}
 
 		function _getById(id) {
-			return _.findWhere(categoriesArr, { $id: id });
+			
+			var deferred = $q.defer();
+			if (_categoriesLoaded) {
+				var category = _.findWhere(categoriesArr, { $id: id });
+				deferred.resolve(category);
+			} else {
+				categoriesArr.$loaded().then(function () {
+					var category = _.findWhere(categoriesArr, { $id: id });
+					if (category) {
+						deferred.resolve(category);
+					}
+				});
+			}
+			return deferred.promise;
+		}
+		
+		function _createCategoryFirebaseArray() {
+			return $firebaseArray.$extend({
+				$$added: function (snap) {
+					var rec = $firebaseArray.prototype.$$added.call(this, snap);
+
+
+					rec.refreshSum = function (start, end) {
+						var start = moment().add(-10, 'days').unix();
+						var end = moment().unix();
+						rec.sum = 0;
+						
+						var categSumRef = categoryRef.child(rec.$id).child('transactions').orderByChild('date').startAt(start).endAt(end);
+						categSumRef.on('child_added', function (snapshot) {
+							console.log(snapshot.key());
+							var data = snapshot.val();
+							rec.sum += data.amount;
+						});						
+					}
+					return rec;
+				}
+			});
 		}
 	}
 })();

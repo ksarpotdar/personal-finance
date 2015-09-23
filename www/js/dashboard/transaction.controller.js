@@ -6,52 +6,50 @@
   angular.module('pf.dashboard')
     .controller('TransactionCtrl', TransactionCtrl);
 
-  TransactionCtrl.$inject = ['$stateParams', 'CONST', 'transactionsDatacontext', 'categoriesDatacontext', 'user', 'transaction']
-  function TransactionCtrl($stateParams, CONST, transactionsDatacontext, categoriesDatacontext, user, transaction) {
+  TransactionCtrl.$inject = ['$stateParams', 'CONST', 'transactionsDatacontext', 'categories', 'user', 'transaction']
+  function TransactionCtrl($stateParams, CONST, transactionsDatacontext, categories, user, transaction) {
     var self = this;
     this.selectedTransactionType = $stateParams.transactionType;
     this.isExpense = $stateParams.transactionType === CONST.TransactionType.Expense;
     this.isIncome = !this.isExpense;
-    this.buttonText = this.isExpense ? 'Add Expense' : 'Add Income';
-    this.currentTransaction = transaction;
+    this.buttonText = transaction.$id ? 'Update' : 'Add';
+    this.transaction = transaction;
     this.categories = [];
     this.addTransaction = addTransaction;
     this.testCreate = testCreate;
     this.createTransaction = createTransaction;
-    this.amount = null;
-    this.note = '';
-    this.date = moment();
-    this.selectedCategory = null;
+    this.categories = categories;
 
     this.datepickerObject = {
       titleLabel: 'Select Date',
       inputDate: new Date(),
       callback: function (val) {
-        self.date = moment(val);
+        self.transaction.date = moment(val);
       }
     };
 
     activate();
     function activate() {
-      categoriesDatacontext.list().then(function (result) {
-        self.categories = result;
-        self.selectedCategory = result[0]; 
-      });
+      if (!self.transaction.$id) {
+        self.transaction.category = categories[0];
+      }
+
       transactionsDatacontext.list().then(function (result) {
         self.transactions = result;
       });
     }
 
     function createTransaction() {
-      transactionsDatacontext.add(self.selectedTransactionType, self.amount, self.note, self.selectedCategory, self.date)
+      var newTran = angular.copy(self.transaction);
+      transactionsDatacontext.add(newTran)
         .then(function () {
           _afterTransactionAddCleanup();
         })
     }
 
     function _afterTransactionAddCleanup() {
-      self.amount = null;
-      self.note = '';
+      self.transaction.amount = null;
+      self.transaction.note = '';
     }
 
     function testCreate() {

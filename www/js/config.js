@@ -86,10 +86,13 @@
           controller: 'TransactionCtrl as tran',
           templateUrl: 'templates/transactions/edit.html',
           resolve: {
-            transaction: function ($stateParams, transactionDatacontext) {
+            transaction: function ($stateParams, transactionsDatacontext) {
               var transactionId = $stateParams.id;
-              return transactionDatacontext.single(transactionId);
-            }
+              return transactionsDatacontext.single(transactionId);
+            },
+            categories: function ($stateParams, categoriesDatacontext) {
+              return categoriesDatacontext.list();
+            },
           }
         });
 

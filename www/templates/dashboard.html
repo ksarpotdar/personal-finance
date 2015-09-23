@@ -24,11 +24,17 @@
     </div>
 
     <ion-list>
-      <ion-item ng-repeat="item in dash.expenseTransactions" class="log-item">
+      <ion-item ng-repeat="tran in dash.expenseTransactions" class="log-item" show-delete="false" can-swipe="true">
         
-          <span class="log-item-date">{{item.date.format('DD/MM')}}</span>
-          <span class="log-item-amount">{{item.amountSigned | currency:item.currency}}</span>
-          <span class="log-item-category">{{item.category}}</span>        
+          <span class="log-item-date">{{tran.date.format('DD/MM')}}</span>
+          <span class="log-item-amount">{{tran.amountSigned | currency:tran.currency}}</span>
+          <span class="log-item-category">{{tran.category}}</span>      
+          
+        <ion-option-button class="button-info" ng-click="dash.editTransaction(tran)">
+          Edit
+        </ion-option-button>
+        <ion-delete-button class="ion-minus-circled" ng-click="dash.deleteTransaction($index)">          
+        </ion-delete-button>
       </ion-item>
     </ion-list>
   </ion-content>

@@ -10,7 +10,7 @@
 		var transactionRef = ref.child('profile').child(user.uid).child('transactions');
 		var transactionsFirebaseArray = _createTransactionsFirebaseArray();
 		var transactions = transactionsFirebaseArray(transactionRef);
-
+		var _transactionsLoaded = false;
 
 		_activate();
 
@@ -28,7 +28,7 @@
 			transactions
 				.$loaded()
 				.then(function (data) {
-					console.log('Transactions loaded: ', data);
+					_transactionsLoaded = true;
 				});
 		}
 
@@ -38,22 +38,22 @@
 
 		function getByCategory(categoryId, start, end) {
 			var categoryRef = categoriesDatacontext.categoryRef;
-			categoryRef.child(categoryId).child('transactions').once('value', function(trSnap){
+			categoryRef.child(categoryId).child('transactions').once('value', function (trSnap) {
 				debugger;
 			});
 		}
 
-		function add(type, amount, note, category, date) {
+		function add(transaction) {
 			var newTransaction = {
-				type: type,
-				amount: amount,
-				note: note,
-				category: category.$id,
-				date: date.unix()
+				type: transaction.type,
+				amount: transaction.amount || 0,
+				note: transaction.note || '',
+				category: transaction.category.$id,
+				date: transaction.date.unix()
 			};
 
-			return transactions.$add(newTransaction).then(function(result){
-				categoriesDatacontext.addTransactionToCategory(category, result.key(), newTransaction);
+			return transactions.$add(newTransaction).then(function (result) {
+				categoriesDatacontext.addTransactionToCategory(transaction.category, result.key(), newTransaction);
 				return result;
 			});
 		}
@@ -61,7 +61,7 @@
 		function update(id, amount, type, category) {
 			var transaction = _getById(id);
 			if (!transaction) return null;
-			
+
 			transaction.amount = name;
 			transaction.type = type;
 			transaction.category = category.$id;
@@ -70,12 +70,29 @@
 		}
 
 		function remove(id) {
-			var transaction = _getById(id);
-			return transactions.$remove(transaction);
+			return _getById(id).then(function (transaction) {
+				if (transaction) {
+					return transactions.$remove(transaction);
+				}else{
+					return null;
+				}
+			});
 		}
 
 		function _getById(id) {
-			return _.findWhere(transactions, { $id: id });
+			var deferred = $q.defer();
+			if (_transactionsLoaded) {
+				var transaction = _.findWhere(transactions, { $id: id });
+				deferred.resolve(transaction);
+			} else {
+				transactions.$loaded().then(function (data) {
+					var transaction = _.findWhere(transactions, { $id: id });
+					if (transaction) {
+						deferred.resolve(transaction);
+					}
+				});
+			}
+			return deferred.promise;
 		}
 
 		function _createTransactionsFirebaseArray() {
@@ -83,15 +100,12 @@
 				$$added: function (snap) {
 					var rec = $firebaseArray.prototype.$$added.call(this, snap);
 					rec.amountSigned = rec.type === CONST.TransactionType.Expense ? -rec.amount : rec.amount;
-					rec.mDate = moment.unix(rec.date);
-					 
-					var categoryRef = categoriesDatacontext.categoryRef;
-					categoryRef.child(rec.category).once('value', function(catSnapshot){
-						var cat = catSnapshot.val();
-						rec.category = cat.name;
-						rec.icon = cat.icon;
+					rec.date = moment.unix(rec.date);
+
+					categoriesDatacontext.get(rec.category).then(function(category){
+						rec.category = category;
 					});
-							
+
 					return rec;
 				}
 			});
