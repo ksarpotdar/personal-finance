@@ -7710,7 +7710,7 @@ a.button {
 .log-item-category {
   display: inline-block;
   width: 100%;
-  margin-right: 100px; }
+  padding-right: 100px; }
 
 .log-item-amount {
   display: inline-block;
@@ -7718,6 +7718,11 @@ a.button {
   text-align: right;
   float: right;
   font-weight: bold; }
+
+.log-item-note {
+  color: #797979;
+  text-transform: italic;
+  font-size: .9rem; }
 
 ion-spinner {
   display: inline-block;

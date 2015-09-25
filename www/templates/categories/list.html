@@ -1,0 +1,42 @@
+<ion-view view-title="Transaction">
+  <ion-content>
+
+    <div class="transaction">
+      Current category: {{tran.transaction.category}}
+    </div>
+
+    <label class="transaction item-input">
+      <input type="number" ng-model="tran.currentTransaction.amount">
+    </label>
+
+    <button class="button" ng-click="tran.testCreate()">Click me !</button>
+
+    <br>
+    <div ng-repeat="cat in tran.categories">{{cat.name}} - {{cat.type}}</div>
+    <hr>
+    <ion-list show-delete="false" can-swipe="true">
+      <ion-item ng-repeat="transaction in tran.transactions" class="transaction-item">
+        <div class="thumbnail-date">
+          <div>{{::transaction.mDate | pfMomFilter:"DD MMM"}}</div>          
+        </div>
+
+        <div class="transaction-details">
+          <span class="transaction-category">
+            {{::transaction.category}}
+          </span>
+          <span class="transaction-amount">
+            {{::transaction.amountSigned}}
+            </span>
+        </div>
+
+        <ion-option-button class="button-info" ng-click="edit(transaction)">
+          Edit
+        </ion-option-button>
+        <ion-delete-button class="ion-minus-circled" ng-click="items.splice($index, 1)">          
+        </ion-delete-button>
+
+      </ion-item>
+    </ion-list>
+
+  </ion-content>
+</ion-view>

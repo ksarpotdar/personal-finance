@@ -3,8 +3,8 @@
 (function () {
 	angular.module('pf.datacontext').factory('transactionsDatacontext', transactionsDatacontext);
 
-	transactionsDatacontext.$inject = ['$q', '$timeout', '$window', '$firebaseArray', 'categoriesDatacontext', 'Auth', 'CONST'];
-	function transactionsDatacontext($q, $timeout, $window, $firebaseArray, categoriesDatacontext, Auth, CONST) {
+	transactionsDatacontext.$inject = ['$q', '$timeout', '$window', '$firebaseArray', '$firebaseUtils', 'categoriesDatacontext', 'Auth', 'CONST'];
+	function transactionsDatacontext($q, $timeout, $window, $firebaseArray, $firebaseUtils, categoriesDatacontext, Auth, CONST) {
 		var ref = new $window.Firebase(CONST.FirebaseUrl);
 		var user = Auth.resolveUser();
 		var transactionRef = ref.child('profile').child(user.uid).child('transactions');
@@ -58,22 +58,32 @@
 			});
 		}
 
-		function update(id, amount, type, category) {
-			var transaction = _getById(id);
-			if (!transaction) return null;
+		function update(updatedTransaction) {
+			return _getById(updatedTransaction.$id).then(function (transaction) {
+				if (!transaction) return null;
+				// hmm .. better grab a new instance of a transaction otherwise we save all kinds of properties... hmm 
 
-			transaction.amount = name;
-			transaction.type = type;
-			transaction.category = category.$id;
+				transaction.amount = updatedTransaction.amount;
+				transaction.note = updatedTransaction.note;
+				transaction.date = updatedTransaction.date.unix();
+				transaction.type = updatedTransaction.type;
+				transaction.category = updatedTransaction.category.$id;
 
-			return transactions.$save(transaction);
+				return transactions.$save(transaction, ['amount', 'note', 'date', 'type', 'category']).then(function () {
+					//TODO - not happy with this. should be handled in angular fire somehow.
+					transaction.category = updatedTransaction.category;
+					transaction.date = updatedTransaction.date;
+					transaction.amountSigned = transaction.type === CONST.TransactionType.Expense ? -transaction.amount : transaction.amount;					 
+					return transaction;
+				});
+			});
 		}
 
-		function remove(id) {
-			return _getById(id).then(function (transaction) {
-				if (transaction) {
-					return transactions.$remove(transaction);
-				}else{
+		function remove(transaction) {
+			return _getById(transaction.$id).then(function (tr) {
+				if (tr) {
+					return transactions.$remove(tr);
+				} else {
 					return null;
 				}
 			});
@@ -97,18 +107,66 @@
 
 		function _createTransactionsFirebaseArray() {
 			return $firebaseArray.$extend({
+				// $$defaults: {
+				// 	amountSigned: this.type === CONST.TransactionType.Expense ? -this.amount : this.amount,
+				// 	date:
+				// },
 				$$added: function (snap) {
 					var rec = $firebaseArray.prototype.$$added.call(this, snap);
 					rec.amountSigned = rec.type === CONST.TransactionType.Expense ? -rec.amount : rec.amount;
 					rec.date = moment.unix(rec.date);
 
-					categoriesDatacontext.get(rec.category).then(function(category){
+					categoriesDatacontext.get(rec.category).then(function (category) {
 						rec.category = category;
 					});
 
 					return rec;
+				},
+				// $$updated: function (snap) {
+				// 	$firebaseArray.prototype.$$updated.call(this, snap);
+				// 	var rec = snap.val();
+				// 	rec.amountSigned = rec.type === CONST.TransactionType.Expense ? -rec.amount : rec.amount;
+				// 	rec.date = moment.unix(rec.date);
+
+				// 	categoriesDatacontext.get(rec.category).then(function (category) {
+				// 		rec.category = category;
+				// 	});
+
+				// 	return rec;
+				// },
+				// https://gist.github.com/katowulf/d0c230f1a7f6b5806a29
+				$save: function (indexOrItem, listOfFields) {
+					if (!listOfFields) {
+						// do a normal save if no list of fields is provided
+						return $firebaseArray.prototype.$save.apply(this, arguments);
+					}
+
+					var self = this;
+					var item = self._resolveItem(indexOrItem);
+					var key = self.$keyAt(item);
+					if (key !== null) {
+						var ref = self.$ref().ref().child(key);
+						var updateFields = pickFields(item, listOfFields);
+						var data = $firebaseUtils.toJSON(updateFields);
+
+						return $firebaseUtils.doSet(ref, data).then(function () {
+							self.$$notify('child_changed', key);
+							return ref;
+						});
+					}
+					else {
+						return $firebaseUtils.reject('Invalid record; could determine key for ' + indexOrItem);
+					}
 				}
 			});
+
+		function pickFields(data, fields) {
+			var out = {};
+			angular.forEach(fields, function (k) {
+				out[k] = data.hasOwnProperty(k) ? data[k] : null;
+			});
+			return out;
 		}
 	}
+}
 })();

@@ -2,7 +2,7 @@
   <ion-content>
     <a ui-sref="account.logout" class="button">Logout</a>
     <div class="item">
-      Current Sold: {{dash.currentSold}}
+      Current Sold: {{dash.currentSold | currency:tran.currency}}
     </div>
 
     <div class="row">
@@ -13,30 +13,31 @@
         <a class="button button-balanced" ui-sref="transaction.add({transactionType: 'income'})">Add income</a>
       </div>
     </div>
-    
+
     <div class="item tabs">
-      <a class="tab-item button button-assertive full-width no-border-radius active" href="#">
+      <button class="tab-item button button-assertive full-width no-border-radius active" ng-click="dash.changeTransactionType(dash.TransactionTypes.Expense)">
         Expenses
-      </a>
-      <a class="tab-item button button-balanced full-width no-border-radius" href="#">
+      </button>
+      <button class="tab-item button button-balanced full-width no-border-radius" ng-click="dash.changeTransactionType(dash.TransactionTypes.Income)">
         <span>Income</span>
-      </a>
+      </button>
     </div>
+    
+    <button ng-click="dash.addDefault()">Add default category</button>
 
     <ion-list>
-      <ion-item ng-repeat="tran in dash.expenseTransactions" class="log-item" show-delete="false" can-swipe="true">
-        
-          <span class="log-item-date">{{tran.date.format('DD/MM')}}</span>
-          <span class="log-item-amount">{{tran.amountSigned | currency:tran.currency}}</span>
-          <span class="log-item-category">{{tran.category}}</span>      
-          
+      <ion-item ng-repeat="tran in dash.transactions | filter: {'type': dash.selectedTransactionType} | orderBy:dash.sortTransactions" class="log-item" show-delete="false" can-swipe="true">
+        <span class="log-item-date">{{tran.date.format('DD/MM')}}</span>
+        <span class="log-item-amount">{{tran.amountSigned | currency:tran.currency}}</span>
+        <div class="log-item-category">
+          {{tran.category.name}}
+          <div class='log-item-note'>{{tran.note}}</div>
+        </div>
+
         <ion-option-button class="button-info" ng-click="dash.editTransaction(tran)">
           Edit
         </ion-option-button>
-        <ion-delete-button class="ion-minus-circled" ng-click="dash.deleteTransaction($index)">          
-        </ion-delete-button>
       </ion-item>
     </ion-list>
   </ion-content>
 </ion-view>
-

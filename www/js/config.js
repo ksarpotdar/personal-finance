@@ -62,7 +62,10 @@
           resolve: {
             user: ['Auth', function (Auth) {
               return Auth.resolveUser();
-            }]
+            }],
+            categories: function ($stateParams, categoriesDatacontext) {
+              return categoriesDatacontext.list();
+            }
           }
         })
         .state('transaction.add', {
@@ -89,10 +92,7 @@
             transaction: function ($stateParams, transactionsDatacontext) {
               var transactionId = $stateParams.id;
               return transactionsDatacontext.single(transactionId);
-            },
-            categories: function ($stateParams, categoriesDatacontext) {
-              return categoriesDatacontext.list();
-            },
+            }
           }
         });
 

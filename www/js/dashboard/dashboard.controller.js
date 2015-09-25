@@ -5,60 +5,53 @@
 
   angular.module('pf.dashboard')
     .controller('DashboardCtrl', DashboardCtrl);
+ 
   
-  //$scope.$on('$ionicView.enter', function(e) {
-  //});
-  
-  
-  DashboardCtrl.$inject = ['$state', 'CONST', 'transactionsDatacontext']
-  function DashboardCtrl($state, CONST, transactionsDatacontext) {
+  DashboardCtrl.$inject = ['$state', 'CONST', 'transactionsDatacontext', 'categoriesDatacontext']
+  function DashboardCtrl($state, CONST, transactionsDatacontext, categoriesDatacontext) {
     var self = this;
     this.currentSold = 0;
+    this.TransactionTypes = CONST.TransactionType;
     this.selectedTransactionType = CONST.TransactionType.Expense;
     this.transactions = [];
-    this.expenseTransactions = [];
-    this.incomeTransactions = [];
 
-    this.addTransaction = addTransaction;
     this.editTransaction = editTransaction;
-    this.deleteTransaction = deleteTransaction;
-
+    this.addDefault = addDefault;
+    this.sortTransactions = _sortTransactions;
+    this.changeTransactionType = _changeTransactionType;
+    
     activate();
     function activate() {
       transactionsDatacontext.list().then(function (result) {
-        self.expenseTransactions = result;
-        self.incomeTransactions = result;
         self.transactions = result;
+        _refreshCurrentSold();
       });
     }
 
-    // _refreshTransactionCollections();
-    // _refreshCurrentSold();
+    function addDefault() {
+      categoriesDatacontext.add('some category WOHOO', CONST.TransactionType.Income);
+    }
 
     function editTransaction(transaction) {
-      // $state.go('transaction.edit', { id: transaction.$id });
       $state.go('transaction.edit', { id: transaction.$id });
     }
 
-    function deleteTransaction($index) {
-
-    }
-
-    function addTransaction() {
-      // var newTransaction = transactionsDatacontext.add({});
-      // _refreshTransactionCollections();
-      // _refreshCurrentSold(newTransaction);
-    }
-
+    function _sortTransactions(val){
+      return -val.date.unix();
+    } 
+    
+    function _changeTransactionType(newType){
+      self.selectedTransactionType = newType;
+    } 
 
     function _refreshCurrentSold(transaction) {
       if (!transaction) {
         self.currentSold = _.reduce(self.transactions,
           function (sum, val) {
-            return sum + val.amountSigned();
+            return sum + val.amountSigned;
           }, 0);
       } else {
-        self.currentSold += transaction.amountSigned();
+        self.currentSold += transaction.amountSigned;
       }
     }
 

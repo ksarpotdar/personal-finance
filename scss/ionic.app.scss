@@ -33,7 +33,7 @@ $ionicons-font-path: "../lib/ionic/fonts" !default;
 .log-item-category{
 	display:inline-block;
 	width:100%;
-	margin-right:100px;
+	padding-right:150px;
 }
 
 .log-item-amount{
@@ -44,7 +44,12 @@ $ionicons-font-path: "../lib/ionic/fonts" !default;
 	font-weight:bold;
 }
 
-
+.log-item-note{
+	color: #797979;
+	text-transform: italic;
+	font-size:.9rem;	
+}
+	
 ion-spinner{
 	display:inline-block;
 	position:relative;
@@ -91,4 +96,5 @@ ion-spinner svg{
 		padding-right: 10px;
 		text-align: center;
 	}
+	
 }
