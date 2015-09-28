@@ -1,37 +1,31 @@
-<ion-view view-title="Transaction">
+<ion-view view-title="Category">
   <ion-content>
-    <form name="transactionForm" novalidate="" ng-submit="tran.execute(transactionForm)">
-
-      <ionic-datepicker input-obj="tran.datepickerObject">
-        <button type="button" class="button button-block button-positive">{{tran.transaction.date | pfMomFilter:"DD MMMM YYYY"}}</button>
-      </ionic-datepicker>
+    <form name="categoryForm" novalidate="" ng-submit="catCtrl.execute(categoryForm)">
       
       <p>
-        <label class="transaction item-input">
-          <span class="input-label">Amount</span>
-          <input type="number" name="amount" ng-model="tran.transaction.amount" max-length="10">
+        <label class="item item-input item-input">
+          <span class="input-label">
+            Name
+          </span>
+          <input type="text" ng-model="catCtrl.category.name" max-length="100">
         </label>
       </p>
 
+      
       <p>
         <label class="item item-input item-select">
           <span class="input-label">
-        Category
-      </span>
-          <select ng-options="cat as cat.name for cat in tran.categories track by cat.$id" ng-model="tran.transaction.category">
+            Type
+          </span>
+          <select ng-options="catType.id as catType.name for catType in catCtrl.categoryTypes" ng-model="catCtrl.category.type">
           </select>
         </label>
       </p>
 
-      <p>
-        <label class="item item-input item-input">
-          <input type="text" ng-model="tran.transaction.note" max-length="1000" placeholder="Note">
-        </label>
-      </p>
-
-      <button type="submit" class="button button-block" ng-class="{'button-balanced': tran.isIncome, 'button-assertive': tran.isExpense}">{{tran.buttonText}}</button>      
+      
+      <button type="submit" class="button button-block button-balanced">Save</button>      
 
     </form>
-    <button type="submit" class="button button-block button-stable" ng-click='tran.delete()' ng-if='tran.transaction.$id'>Delete</button>
+    <button type="button" class="button button-block button-assertive" ng-click='catCtrl.delete()' ng-if='catCtrl.category.$id'>Delete</button>
   </ion-content>
 </ion-view>

@@ -51,9 +51,7 @@
     function _createTransaction() {
       var newTran = angular.copy(self.transaction);
       transactionsDatacontext.add(newTran)
-        .then(function () {
-          _afterTransactionAddCleanup();
-        });
+        .then(function () {});
     }
 
     function _delete() {
@@ -65,14 +63,8 @@
     function _updateTransaction() {
       transactionsDatacontext.update(self.transaction)
         .then(function () {
-          _afterTransactionAddCleanup();
           _goBack();
         })
-    }
-
-    function _afterTransactionAddCleanup() {
-      self.transaction.amount = null;
-      self.transaction.note = '';
     }
 
     function _goBack() {

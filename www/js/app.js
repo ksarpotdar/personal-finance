@@ -1,7 +1,7 @@
 /* global angular */
 
 (function () {
-  angular.module('pf', ['ionic', 'ionic-datepicker', 'pf.dashboard', 'pf.account', 'pf.datacontext', 'pf.common-directives', 'pf.constants', 'pf.filters'])
+  angular.module('pf', ['ionic', 'ionic-datepicker', 'pf.dashboard', 'pf.account', 'pf.datacontext',  'pf.categories', 'pf.common-directives', 'pf.constants', 'pf.filters'])
     .run(function ($ionicPlatform) {
       $ionicPlatform.ready(function () {
         // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -25,6 +25,11 @@
             $state.go('account.login');
           }
         }
+      });
+      
+      $rootScope.$on('$stateChangeError', function (event, toState, toParams, fromState, fromParams, error){
+        console.error('$stateChangeError: ', error);
+        console.log(arguments);
       });
     })
 })();

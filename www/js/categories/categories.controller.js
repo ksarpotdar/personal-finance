@@ -5,12 +5,14 @@
 
   angular.module('pf.categories')
     .controller('CategoriesCtrl', CategoriesCtrl);
- 
-  
+
+
   CategoriesCtrl.$inject = ['$state', 'CONST', 'categoriesDatacontext']
   function CategoriesCtrl($state, CONST, categoriesDatacontext) {
     var self = this;
     this.categories = [];
+
+    this.edit = _edit;
 
     activate();
     function activate() {
@@ -19,8 +21,8 @@
       });
     }
 
-    function addDefault() {
-      categoriesDatacontext.add('some category WOHOO', CONST.TransactionType.Income);
+    function _edit(category) {
+      $state.go('category.edit', { id: category.$id });
     }
   }
 })();

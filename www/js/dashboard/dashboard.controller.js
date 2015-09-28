@@ -29,7 +29,8 @@
     }
 
     function addDefault() {
-      categoriesDatacontext.add('some category WOHOO', CONST.TransactionType.Income);
+      debugger;
+      $state.go('category.add');
     }
 
     function editTransaction(transaction) {
