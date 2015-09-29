@@ -3,8 +3,8 @@
 (function () {
 	angular.module('pf.datacontext').factory('transactionsDatacontext', transactionsDatacontext);
 
-	transactionsDatacontext.$inject = ['$q', '$timeout', '$window', '$firebaseArray', '$firebaseUtils', 'categoriesDatacontext', 'Auth', 'CONST'];
-	function transactionsDatacontext($q, $timeout, $window, $firebaseArray, $firebaseUtils, categoriesDatacontext, Auth, CONST) {
+	transactionsDatacontext.$inject = ['$q', '$timeout', '$window', '$firebaseArray', '$firebaseUtils', 'categoriesDatacontext', 'Auth', 'CONST', 'errors'];
+	function transactionsDatacontext($q, $timeout, $window, $firebaseArray, $firebaseUtils, categoriesDatacontext, Auth, CONST, errors) {
 		var ref = new $window.Firebase(CONST.FirebaseUrl);
 		var user = Auth.resolveUser();
 		var transactionRef = ref.child('profile').child(user.uid).child('transactions');
@@ -73,7 +73,7 @@
 					//TODO - not happy with this. should be handled in angular fire somehow.
 					transaction.category = updatedTransaction.category;
 					transaction.date = updatedTransaction.date;
-					transaction.amountSigned = transaction.type === CONST.TransactionType.Expense ? -transaction.amount : transaction.amount;					 
+					transaction.amountSigned = transaction.type === CONST.TransactionType.Expense ? -transaction.amount : transaction.amount;
 					return transaction;
 				});
 			});
@@ -93,12 +93,18 @@
 			var deferred = $q.defer();
 			if (_transactionsLoaded) {
 				var transaction = _.findWhere(transactions, { $id: id });
-				deferred.resolve(transaction);
+				if (transaction) {
+					deferred.resolve(transaction);
+				} else {
+					deferred.reject(new errors.NotFoundError('Transaction not found'));
+				}
 			} else {
 				transactions.$loaded().then(function (data) {
 					var transaction = _.findWhere(transactions, { $id: id });
 					if (transaction) {
 						deferred.resolve(transaction);
+					}else{
+						deferred.reject(new errors.NotFoundError('Transaction not found'));
 					}
 				});
 			}
@@ -107,10 +113,6 @@
 
 		function _createTransactionsFirebaseArray() {
 			return $firebaseArray.$extend({
-				// $$defaults: {
-				// 	amountSigned: this.type === CONST.TransactionType.Expense ? -this.amount : this.amount,
-				// 	date:
-				// },
 				$$added: function (snap) {
 					var rec = $firebaseArray.prototype.$$added.call(this, snap);
 					rec.amountSigned = rec.type === CONST.TransactionType.Expense ? -rec.amount : rec.amount;
@@ -122,20 +124,13 @@
 
 					return rec;
 				},
-				// $$updated: function (snap) {
-				// 	$firebaseArray.prototype.$$updated.call(this, snap);
-				// 	var rec = snap.val();
-				// 	rec.amountSigned = rec.type === CONST.TransactionType.Expense ? -rec.amount : rec.amount;
-				// 	rec.date = moment.unix(rec.date);
-
-				// 	categoriesDatacontext.get(rec.category).then(function (category) {
-				// 		rec.category = category;
-				// 	});
-
-				// 	return rec;
-				// },
 				// https://gist.github.com/katowulf/d0c230f1a7f6b5806a29
 				$save: function (indexOrItem, listOfFields) {
+					
+					//FIXME - abstract this save method to a different object to use for both categories and transactions
+					
+					listOfFields = listOfFields || []
+
 					if (!listOfFields) {
 						// do a normal save if no list of fields is provided
 						return $firebaseArray.prototype.$save.apply(this, arguments);
@@ -160,13 +155,13 @@
 				}
 			});
 
-		function pickFields(data, fields) {
-			var out = {};
-			angular.forEach(fields, function (k) {
-				out[k] = data.hasOwnProperty(k) ? data[k] : null;
-			});
-			return out;
+			function pickFields(data, fields) {
+				var out = {};
+				angular.forEach(fields, function (k) {
+					out[k] = data.hasOwnProperty(k) ? data[k] : null;
+				});
+				return out;
+			}
 		}
 	}
-}
 })();

@@ -3,14 +3,14 @@
 (function () {
 	angular.module('pf.datacontext').factory('categoriesDatacontext', categoriesDatacontext);
 
-	categoriesDatacontext.$inject = ['$q', '$timeout', '$window', '$firebaseArray', 'Auth', 'CONST'];
-	function categoriesDatacontext($q, $timeout, $window, $firebaseArray, Auth, CONST) {
+	categoriesDatacontext.$inject = ['$q', '$timeout', '$window', '$firebaseArray', '$firebaseUtils', 'Auth', 'CONST', 'errors'];
+	function categoriesDatacontext($q, $timeout, $window, $firebaseArray, $firebaseUtils, Auth, CONST, errors) {
 		var ref = new $window.Firebase(CONST.FirebaseUrl);
 		var user = Auth.resolveUser();
 		var categoryRef = ref.child('profile').child(user.uid).child('categories');
 		var categoriesArr = _createCategoryFirebaseArray()(categoryRef);
 		var _categoriesLoaded = false;
-		
+
 		_activate();
 
 		return {
@@ -18,7 +18,6 @@
 			sumByCategory: sumByCategory,
 			get: _getById,
 			addTransactionToCategory: addTransactionToCategory,
-			save: save,
 			categoryRef: categoryRef
 		};
 
@@ -164,36 +163,21 @@
 			// });
 		}
 
-		function sumByCategory() {
-			// var categoryTransactionCache = {};
-			// var start = moment().add(-10, 'days').unix();
-			// var end = moment().unix();
-
-			// for (var i = 0; i < categoriesArr.length; i++) {
-			// 	var categ = categoriesArr[i];
-
-			// 	categoryTransactionCache[categ.$id] = categoryRef.child(categ.$id).child('transactions').orderByChild('date').startAt(start).endAt(end);
-			// 	categoryTransactionCache[categ.$id].on('value', function (snapshot) {
-			// 		console.log(snapshot.val())
-			// 	});
-			// }
-			
+		function sumByCategory() {			
 			for (var i = 0; i < categoriesArr.length; i++) {
 				var categ = categoriesArr[i];
 				categ.refreshSum();
 			}
-			
-			$timeout(function(){
+
+			$timeout(function () {
 				var r = categoriesArr[0];
 				console.log(r);
 			}, 1000);
-
 		}
 
 		function getCategories() {
 			return categoriesArr.$loaded();
 		}
-
 		
 		//link the category with a transaction
 		function addTransactionToCategory(category, transactionKey, transaction) {
@@ -204,45 +188,82 @@
 					date: transaction.date
 				}, transaction.date);
 		}
-		
+
 		function _getById(id) {
-			
 			var deferred = $q.defer();
 			if (_categoriesLoaded) {
 				var category = _.findWhere(categoriesArr, { $id: id });
-				deferred.resolve(category);
+				if (category) {
+					deferred.resolve(category);
+				} else {
+					deferred.reject(new errors.NotFoundError('Category not found'));
+				}
 			} else {
 				categoriesArr.$loaded().then(function () {
 					var category = _.findWhere(categoriesArr, { $id: id });
 					if (category) {
 						deferred.resolve(category);
+					} else {
+						deferred.reject(new errors.NotFoundError('Category not found'));
 					}
 				});
 			}
 			return deferred.promise;
 		}
-		
+
 		function _createCategoryFirebaseArray() {
 			return $firebaseArray.$extend({
 				$$added: function (snap) {
 					var rec = $firebaseArray.prototype.$$added.call(this, snap);
 
-
 					rec.refreshSum = function (start, end) {
 						var start = moment().add(-10, 'days').unix();
 						var end = moment().unix();
 						rec.sum = 0;
-						
+
 						var categSumRef = categoryRef.child(rec.$id).child('transactions').orderByChild('date').startAt(start).endAt(end);
 						categSumRef.on('child_added', function (snapshot) {
 							console.log(snapshot.key());
 							var data = snapshot.val();
 							rec.sum += data.amount;
-						});						
+						});
 					}
 					return rec;
+				},
+				// https://gist.github.com/katowulf/d0c230f1a7f6b5806a29
+				$save: function (indexOrItem, listOfFields) {
+					listOfFields = listOfFields || ['name', 'type', 'deleted']
+					if (!listOfFields) {
+						// do a normal save if no list of fields is provided
+						return $firebaseArray.prototype.$save.apply(this, arguments);
+					}
+
+					var self = this;
+					var item = self._resolveItem(indexOrItem);
+					var key = self.$keyAt(item);
+					if (key !== null) {
+						var ref = self.$ref().ref().child(key);
+						var updateFields = pickFields(item, listOfFields);
+						var data = $firebaseUtils.toJSON(updateFields);
+
+						return $firebaseUtils.doSet(ref, data).then(function () {
+							self.$$notify('child_changed', key);
+							return ref;
+						});
+					}
+					else {
+						return $firebaseUtils.reject('Invalid record; could determine key for ' + indexOrItem);
+					}
 				}
 			});
+
+			function pickFields(data, fields) {
+				var out = {};
+				angular.forEach(fields, function (k) {
+					out[k] = data.hasOwnProperty(k) ? data[k] : null;
+				});
+				return out;
+			}
 		}
 	}
 })();

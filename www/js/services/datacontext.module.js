@@ -1,3 +1,3 @@
 (function(){
-	angular.module('pf.datacontext', ['pf.constants', 'firebase']);
+	angular.module('pf.datacontext', ['pf.constants', 'firebase', 'pf.errors']);
 })();

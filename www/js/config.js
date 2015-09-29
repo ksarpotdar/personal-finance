@@ -64,7 +64,9 @@
               return Auth.resolveUser();
             }],
             categories: function ($stateParams, categoriesDatacontext) {
-              return categoriesDatacontext.list();
+              return categoriesDatacontext.list().then(function (categories) {
+                return _.filter(categories, function (c) { return !c.deleted; });
+              });
             }
           }
         })

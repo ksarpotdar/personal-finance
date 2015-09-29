@@ -27,7 +27,6 @@
     this.execute = execute;
     this.delete = _delete;
 
-
     activate();
     function activate() {
       if (!self.transaction.$id) {

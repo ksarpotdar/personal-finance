@@ -8,8 +8,8 @@
     .controller('CategoryCtrl', CategoryCtrl);
 
 
-  CategoryCtrl.$inject = ['$state', '$ionicHistory', 'CONST', 'CategoriesService', 'category', 'user']
-  function CategoryCtrl($state, $ionicHistory, CONST, categoriesService, category, user) {
+  CategoryCtrl.$inject = ['$state', '$ionicHistory', '$ionicPopup', 'CONST', 'CategoryService', 'category', 'user']
+  function CategoryCtrl($state, $ionicHistory, $ionicPopup, CONST, categoriesService, category, user) {
     var self = this;
     this.category = angular.copy(category);
 
@@ -41,7 +41,7 @@
     }
 
     function _addCategory() {
-      categoriesService.addCategory(self.category.name, self.category.type, user).then(function (result) {
+      categoriesService.add(self.category.name, self.category.type, user).then(function (result) {
         console.log('wohooo', result);
       }).catch(function (result) {
         console.log('oooops', result);
@@ -49,7 +49,7 @@
     }
 
     function _updateCategory() {
-      categoriesService.addCategory(self.category).then(function (result) {
+      categoriesService.update(self.category).then(function (result) {
         console.log('wohooo', result);
       }).catch(function (result) {
         console.log('oooops', result);
@@ -57,16 +57,24 @@
     }
 
     function _delete() {
-      //TODO: show warning message
-      //TODO: delete all associations from the transactions linked with this category
-      // we could just mark the category as deleted and simply not show it in the dropdown when editing a category or when showing the  list of categories 
+      var confirmPopup = $ionicPopup.confirm({
+        title: 'NO UNDO',
+        template: 'Are you sure you want to delete this category?'
+      });
+      
+      confirmPopup.then(function (res) {
+        if (res) {
+          categoriesService.delete(self.category);
+          _goBack();
+        }
+      });      
     }
-        
+
     function _goBack() {
       if ($ionicHistory.backView()) {
         $ionicHistory.goBack();
       } else {
-        $state.go('categories.list');
+        $state.go('category.list');
       }
     }
   }

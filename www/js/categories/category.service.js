@@ -4,19 +4,20 @@
   "use strict";
 
   angular.module('pf.categories')
-    .factory('CategoriesService', categoriesService);
+    .factory('CategoryService', categoriesService);
 
 
-  categoriesService.$inject = ['$state', '$q', 'CONST', 'categoriesDatacontext']
-  function categoriesService($state, $q, CONST, categoriesDatacontext) {
+  categoriesService.$inject = ['$state', '$q', 'CONST', 'categoriesDatacontext', 'errors']
+  function categoriesService($state, $q, CONST, categoriesDatacontext, errors) {
     var self = this;
     this.categories = [];
-
 
     _activate();
 
     return {
-      addCategory: _addCategory,
+      add: _add,
+      updat: _update,
+      delete: _delete,
     };
 
     function _activate() {
@@ -25,68 +26,45 @@
       });
     }
 
-    /**
-    * Adds a new category, returns a $q promise
-    */
-    function _addCategory(name, type, user) {
+    function _add(name, type, user) {           
       var deferred = $q.defer();
 
       if (_categoryExists(name)) {
-        deferred.reject({
-          error: CONST.Errors.Category.DUPLICATE_CATEGORY_NAME,
-          message: 'Category with this name already exists.'
-        });
+        deferred.reject(new errors.DuplicateCategoryNameError('Category with this name already exists.'));
       } else {
         var newCategory = { user_id: user.uid, type, name: name };
-
-        self.categories.$add(newCategory).then(function (result) {
-          deferred.resolve(result);
-        }).catch(function (err) {
-          deferred.reject(err);
-        });
+        return self.categories.$add(newCategory)
       }
 
       return deferred.promise;
     }    
     
-
-    /**
-    * update the category, returns a $q promise
-    */
-    function _updateCategory(categ) {
-
-      var deferred = $q.defer();
-
-      var category = categoriesDatacontext.get(categ.$id);
-      if (!category) {
-        deferred.reject({
-          error: CONST.Errors.Category.DUPLICATE_NAME,
-          message: 'Category with this name already exists.'
-        });
-      } else {
-        
-        if (_categoryExists(categ.name)) {
-          deferred.reject({
-            error: CONST.Errors.Category.NOT_FOUND,
-            message: 'Category not found.'
-          });
-        } else {          
+    function _update(categ) {
+      return categoriesDatacontext.get(categ.$id).then(function (category) {
+        if (_categoryExists(categ.name, categ.$id)) {
+          throw new errors.DuplicateCategoryNameError('Category with this name already exists.');
+        } else {
           category.name = categ.name;
           category.type = categ.type;
-
-          self.categories.$save(category).then(function (result) {
-            deferred.resolve(category);
-          }).catch(function (err) {
-            deferred.reject(err);
-          });
+          return self.categories.$save(category);
         }
-      }
-
-      return deferred.promise;
+      });
+    }
+    
+    function _delete(categ) {
+      return categoriesDatacontext.get(categ.$id).then(function(category){
+        category.deleted = moment().unix();
+        return self.categories.$save(category);
+      });
     }
 
-    function _categoryExists(name) {
+    function _categoryExists(name, excludedId) {
       if (!self.categories.length) { return false; }
+
+      if (excludedId) {
+        var cat = _getByName(name);
+        return cat && cat.$id !== excludedId;
+      }
       return !!_getByName(name);
     }
 
@@ -95,5 +73,6 @@
       var category = _.find(self.categories, function (c) { return c.name.toLowerCase() === lowerName; });
       return category;
     }
+
   }
 })();

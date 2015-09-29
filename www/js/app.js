@@ -31,5 +31,5 @@
         console.error('$stateChangeError: ', error);
         console.log(arguments);
       });
-    })
+    });
 })();
