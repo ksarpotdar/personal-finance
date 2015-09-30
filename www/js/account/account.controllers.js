@@ -51,7 +51,7 @@
       $ionicHistory.nextViewOptions({
         historyRoot: true
       });
-      $state.go('dashboard', {}, { location: "replace", reload: true });
+      $state.go('tabs.dashboard', {}, { location: "replace", reload: true });
     }
 
   }
@@ -97,7 +97,7 @@
       $ionicHistory.nextViewOptions({
         historyRoot: true
       });
-      $state.go('dashboard', {}, { location: "replace", reload: true });
+      $state.go('tabs.dashboard', {}, { location: "replace", reload: true });
     }
   }
 

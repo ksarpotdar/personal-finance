@@ -19,7 +19,7 @@
     this.addDefault = addDefault;
     this.sortTransactions = _sortTransactions;
     this.changeTransactionType = _changeTransactionType;
-    
+    debugger;
     activate();
     function activate() {
       transactionsDatacontext.list().then(function (result) {

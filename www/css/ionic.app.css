@@ -7756,3 +7756,7 @@ ion-spinner svg {
   float: left;
   padding-right: 10px;
   text-align: center; }
+
+.coming-soon {
+  color: #888;
+  font-style: italic; }

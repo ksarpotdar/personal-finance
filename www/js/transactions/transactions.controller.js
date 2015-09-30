@@ -3,7 +3,7 @@
 (function () {
   "use strict";
 
-  angular.module('pf.dashboard')
+  angular.module('pf.transactions')
     .controller('TransactionCtrl', TransactionCtrl);
 
   TransactionCtrl.$inject = ['$stateParams', '$state', '$ionicHistory', 'CONST', 'transactionsDatacontext', 'categories', 'user', 'transaction']
