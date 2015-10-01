@@ -103,3 +103,67 @@ ion-spinner svg{
 	color: #888; 
 	font-style: italic;
 }
+
+.fake-tabs{
+	overflow:hidden;
+	padding-left:0;
+	padding-right:0;
+	
+	.fake-tab{
+		width:50%;
+		float:left;
+		
+		button.inactive{
+			background-color:white;
+			color: $positive;
+		}
+	}
+}
+
+$icon-width: 16px;
+$icon-height: 16px;
+$icons: image-url('img/sprite.png');
+
+.icon {
+  background-image: $icons;
+  background-repeat: no-repeat;
+  width: $icon-width;
+  height: $icon-height;
+	  
+}
+	.icon.plus-icon {
+		background-position: 0 0;    
+	}  
+	
+	.icon.minus-icon {
+		background-position: -17px 0;    
+	}
+
+
+.round-button{
+	position: absolute;
+    z-index: 3;
+    bottom: 65px;
+    right: 10px;
+    border-radius: 50%;
+    height: 30px;
+    width: 30px;
+    text-align: center;
+    box-shadow: rgba(0, 0, 0, 0.298039) 0px 2px 8px, rgba(0, 0, 0, 0.0980392) 0px 0px 1px, rgba(255, 255, 255, 0.247059) 0px 1px 0px inset, rgba(0, 0, 0, 0.14902) 0px -1px 0px inset;
+	border: 0px;
+	
+	.icon{
+		position:relative;
+		margin:auto;
+		top:15px;
+	}
+	
+}
+
+.dashboard-header{
+	text-align:center;	
+}
+
+.dash-total{
+	font-weight:bold;
+}

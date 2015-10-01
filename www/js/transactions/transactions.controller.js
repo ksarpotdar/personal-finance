@@ -74,75 +74,12 @@
       }
     }
 
-    function testCreate() {
-      // debugger;
-      // transactionsDatacontext.listByCategory(self.categories[0].$id);
-      
-      categoriesDatacontext.sumByCategory();
-      
-      
-      // categoriesDatacontext
-      //   .add('some category WOHOO', CONST.TransactionType.Income)
-      //   .then(function (result) {
-      //     console.log(result);
-          
-      //     transactionsDatacontext.add(
-      //       CONST.TransactionType.Income,
-      //       100,
-      //       self.categories[0],
-      //       moment().unix()
-      //     ).then(function(result){
-      //       console.log(result);
-      //     }).catch(function(err){
-      //       console.error(err);
-      //     })
-          
-          
-      //     transactionsDatacontext.add(
-      //       CONST.TransactionType.Income,
-      //       100,
-      //       self.categories[0],
-      //       moment().unix()
-      //     ).then(function(result){
-      //       console.log(result);
-      //     }).catch(function(err){
-      //       console.error(err);
-      //     })
-          
-          
-      //     transactionsDatacontext.add(
-      //       CONST.TransactionType.Income,
-      //       100,
-      //       self.categories[0],
-      //       moment().unix()
-      //     ).then(function(result){
-      //       console.log(result);
-      //     }).catch(function(err){
-      //       console.error(err);
-      //     })
-          
-      //   }).catch(function (err) {
-      //     console.error(err);
-      //   });
-      
-      
-      // transactionsDatacontext.listCategory('d'
-      // ).then(function(result){
-      //   console.log(result);
-      // }).catch(function(err){
-      //   console.error(err);
-      // });
-      
-      
-      // transactionsDatacontext
-    }
-
     function addTransaction() {
       if (self.currentTransaction.id) {
         transactionsDatacontext.update(self.currentTransaction);
       } else {
         transactionsDatacontext.add(self.currentTransaction);
-      }
+      } 
     }
   }
 })();

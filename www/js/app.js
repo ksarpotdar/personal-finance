@@ -1,6 +1,7 @@
 /* global angular */
 
 (function () {
+  'use strict';
   angular.module('pf', ['ionic', 'ionic-datepicker', 'pf.dashboard', 'pf.account', 'pf.datacontext', 'pf.categories', 'pf.transactions', 'pf.common-directives', 'pf.constants', 'pf.filters'])
     .run(function ($ionicPlatform) {
       $ionicPlatform.ready(function () {
@@ -17,7 +18,7 @@
       });
     })
     .run(function ($rootScope, $state, Auth) {
-      $rootScope.$on('$stateChangeStart', function (event, next, nextParams, fromState) {
+      $rootScope.$on('$stateChangeStart', function (event, next) {
         if (!Auth.signedIn()) {
           // all controllers need authentication unless otherwise specified
           if (!next.data || !next.data.anonymous) {

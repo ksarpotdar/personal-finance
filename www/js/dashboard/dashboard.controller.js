@@ -1,25 +1,23 @@
-/* global _, moment, angular */
-
 (function () {
-  "use strict";
+  'use strict';
 
   angular.module('pf.dashboard')
     .controller('DashboardCtrl', DashboardCtrl);
  
   
-  DashboardCtrl.$inject = ['$state', 'CONST', 'transactionsDatacontext', 'categoriesDatacontext']
-  function DashboardCtrl($state, CONST, transactionsDatacontext, categoriesDatacontext) {
+  DashboardCtrl.$inject = ['$state', 'CONST', 'transactionsDatacontext'];
+  function DashboardCtrl($state, CONST, transactionsDatacontext) {
     var self = this;
     this.currentSold = 0;
     this.TransactionTypes = CONST.TransactionType;
     this.selectedTransactionType = CONST.TransactionType.Expense;
     this.transactions = [];
-
+    this.viewTitle = 'September';
     this.editTransaction = editTransaction;
     this.addDefault = addDefault;
     this.sortTransactions = _sortTransactions;
     this.changeTransactionType = _changeTransactionType;
-    debugger;
+    
     activate();
     function activate() {
       transactionsDatacontext.list().then(function (result) {
@@ -29,7 +27,6 @@
     }
 
     function addDefault() {
-      debugger;
       $state.go('category.add');
     }
 

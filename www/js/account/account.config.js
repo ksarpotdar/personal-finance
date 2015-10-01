@@ -27,6 +27,7 @@
       .state('account.logout', {
         url: '/logout',
         controller: 'LogoutCtrl as logout',
+        template: '',
         data: {
           anonymous: true
         }

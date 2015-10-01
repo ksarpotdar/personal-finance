@@ -7,13 +7,15 @@
     .controller('LogoutCtrl', logoutCtrl)
     .controller('NewAccountCtrl', newAccountCtrl);
 
-  logoutCtrl.$inject = ['$state', 'Auth'];
-  function logoutCtrl($state, Auth) {
-
+  logoutCtrl.$inject = ['$state', '$ionicHistory', 'Auth'];
+  function logoutCtrl($state, $ionicHistory, Auth) {
     activate();
 
     function activate() {
       Auth.logout();
+      $ionicHistory.nextViewOptions({
+        disableBack: true
+      });
       $state.go('account.login');
     }
   }
@@ -30,6 +32,7 @@
     activate();
 
     function activate() {
+      //$ionicHistory.clearHistory();
       if (Auth.signedIn()) {
         _toDashboard();
       }

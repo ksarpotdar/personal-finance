@@ -1,10 +1,11 @@
 /* global angular */
 
 (function () {
+  'use strict';
   angular.module('pf')
-    .config(['$provide', function ($provide) {
+    .config(['$provide', function ($provide) { 
       $provide.decorator('$locale', ['$delegate', function ($delegate) {
-        if ($delegate.id == 'en-us') {
+        if ($delegate.id === 'en-us') {
           $delegate.NUMBER_FORMATS.PATTERNS[1].negPre = '-\u00A4';
           $delegate.NUMBER_FORMATS.PATTERNS[1].negSuf = '';
         }
@@ -14,7 +15,7 @@
     .config(function ($stateProvider, $urlRouterProvider) {
 
       $stateProvider
-
+ 
         .state('tabs', {
           url: '',
           abstract: true,
@@ -38,7 +39,6 @@
           url: '/settings',
           views: {
             'tab-settings': {
-              // controller: 'DashboardCtrl as dash',
               templateUrl: 'templates/settings.html'
             }
           }

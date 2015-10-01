@@ -1,6 +1,6 @@
-/* global angular */
-
 (function () {
+  'use strict';
+  
   angular.module('pf.constants', [])
     .constant('CONST', {
       TransactionType: {

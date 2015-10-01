@@ -1,32 +1,32 @@
-<ion-view view-title="Dashboard">
+<ion-view view-title="{{dash.viewTitle}}">
   <ion-content>
-    <a ui-sref="account.logout" class="button">Logout</a>
+
     <div class="item">
-      Current Sold: {{dash.currentSold | currency:tran.currency}}
+     <div class="dashboard-header">
+       <span class="dash-total">{{dash.currentSold | currency:tran.currency}}</span>
+     </div>
+      
     </div>
 
-    <div class="row">
-      <div class="col col-50">
-        <a class="button button-assertive" ui-sref="transaction.add({transactionType: 'expense'})">Add expense</a>
+    <div class="item fake-tabs">
+      <div class="fake-tab">
+        <button class="button button-positive full-width no-border-radius active" ng-click="dash.changeTransactionType(dash.TransactionTypes.Expense)"
+        ng-class="{'inactive': dash.selectedTransactionType !== dash.TransactionTypes.Expense}">
+          Expenses
+        </button>
       </div>
-      <div class="col col-50">
-        <a class="button button-balanced" ui-sref="transaction.add({transactionType: 'income'})">Add income</a>
+      <div class="fake-tab">
+        <button class="button button-positive full-width no-border-radius active" ng-click="dash.changeTransactionType(dash.TransactionTypes.Income)"
+        ng-class="{'inactive': dash.selectedTransactionType !== dash.TransactionTypes.Income}">
+          <span>Income</span>
+        </button>
       </div>
-    </div>
 
-    <div class="item tabs">
-      <button class="tab-item button button-assertive full-width no-border-radius active" ng-click="dash.changeTransactionType(dash.TransactionTypes.Expense)">
-        Expenses
-      </button>
-      <button class="tab-item button button-balanced full-width no-border-radius" ng-click="dash.changeTransactionType(dash.TransactionTypes.Income)">
-        <span>Income</span>
-      </button>
     </div>
-    
-    <button ng-click="dash.addDefault()">Add default category</button>
 
     <ion-list>
-      <ion-item ng-repeat="tran in dash.transactions | filter: {'type': dash.selectedTransactionType} | orderBy:dash.sortTransactions" class="log-item" show-delete="false" can-swipe="true">
+      <ion-item ng-repeat="tran in dash.transactions | filter: {'type': dash.selectedTransactionType} | orderBy:dash.sortTransactions"
+      class="log-item" show-delete="false" can-swipe="true">
         <span class="log-item-date">{{tran.date.format('DD/MM')}}</span>
         <span class="log-item-amount">{{tran.amountSigned | currency:tran.currency}}</span>
         <div class="log-item-category">
@@ -40,4 +40,10 @@
       </ion-item>
     </ion-list>
   </ion-content>
+  <a class="button button-balanced round-button" ng-if="dash.selectedTransactionType === dash.TransactionTypes.Income" ui-sref="transaction.add({transactionType: 'income'})">
+    <div class="icon plus-icon"></div>
+  </a>
+  <a class="button button-assertive round-button" ng-if="dash.selectedTransactionType === dash.TransactionTypes.Expense" ui-sref="transaction.add({transactionType: 'expense'})">
+    <div class="icon minus-icon"></div>
+  </a>
 </ion-view>
