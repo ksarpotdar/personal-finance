@@ -1,6 +1,5 @@
-/* global moment */
-/* global angular */
 (function () {
+	'use strict';
 	angular.module('pf.datacontext').factory('categoriesDatacontext', categoriesDatacontext);
 
 	categoriesDatacontext.$inject = ['$q', '$timeout', '$window', '$firebaseArray', 'Auth', 'CONST'];
@@ -17,7 +16,7 @@
 			get: _getById,
 			add: add,
 			update: update,
-			categoryExists: categoryExists			
+			categoryExists: categoryExists
 		};
 
 		function _activate(user) {
@@ -25,8 +24,64 @@
 				.$loaded()
 				.then(function (data) {
 					console.log('Categories loaded: ', data);
-				});;
-			
+				});
+		}
+
+		function getCategories() {
+			return categoriesArr.$loaded();
+		}
+
+		function categoryExists(name) {
+			if (!categoriesArr.length) { return false; }
+			return !!_getByName(name);
+		}
+
+		function add(name, type, parentCategoryId) {
+			var deferred = $q.defer();
+			if (categoryExists(name)) {
+				deferred.reject({
+					error: CONST.Errors.Category.DUPLICATE_CATEGORY_NAME,
+					message: 'Category with this name already exists.'
+				});
+			} else {
+				var newCategory = { user_id: user.uid, type, name: name };
+				categoriesArr.$add(newCategory).then(function (result) {
+					deferred.resolve(result);
+				}).catch(function (err) {
+					deferred.reject(err);
+				});
+			}
+
+			return deferred.promise;
+		}
+
+		function update(id, name, type) {
+			var category = _getById(id);
+			if (!category) { return null; }
+
+			category.name = name;
+			category.type = type;
+			return categoriesArr.$save(category);
+		}
+
+		function remove(id) {
+			var category = _getById(id);
+			return categoriesArr.$remove(category);
+		}
+
+		function _getByName(name) {
+			var lowerName = name.toLowerCase();
+			var category = _.find(categoriesArr, function (c) { return name.toLowerCase() === lowerName; });
+			return category;
+		}
+
+		function _getById(id) {
+			return _.findWhere(categoriesArr, { $id: id });
+		}
+	}
+})();
+
+
 			//var categoriesArr = $firebaseArray(ref.child('category'));
 			
 			// 	categoriesArr.$loaded()
@@ -159,58 +214,3 @@
 			// 		return this.type === CONST.TransactionType.Expense ? -this.amount : this.amount;
 			// 	}
 			// });
-		}
-
-		function getCategories() {
-			return categoriesArr.$loaded();
-		}
-
-		function categoryExists(name) {
-			if (!categoriesArr.length) { return false; }
-			return !!_getByName(name);
-		}
-
-		function add(name, type, parentCategoryId) {
-			var deferred = $q.defer();
-			if (categoryExists(name)) {
-				deferred.reject({
-					error: CONST.Errors.Category.DUPLICATE_CATEGORY_NAME,
-					message: 'Category with this name already exists.'
-				});
-			} else {
-				var newCategory = { user_id: user.uid, type, name: name };
-				categoriesArr.$add(newCategory).then(function (result) {
-					deferred.resolve(result);
-				}).catch(function (err) {
-					deferred.reject(err);
-				});
-			}
-
-			return deferred.promise;
-		}
-
-		function update(id, name, type) {
-			var category = _getById(id);
-			if (!category) return null;
-
-			category.name = name;
-			category.type = type;
-			return categoriesArr.$save(category);
-		}
-
-		function remove(id) {
-			var category = _getById(id);
-			return categoriesArr.$remove(category);
-		}
-		
-		function _getByName(name) {
-			var lowerName = name.toLowerCase();
-			var category = _.find(categoriesArr, function (c) { return name.toLowerCase() === lowerName; });
-			return category;
-		}
-
-		function _getById(id) {
-			return _.findWhere(categoriesArr, { $id: id });
-		}
-	}
-})();

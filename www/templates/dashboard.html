@@ -1,11 +1,24 @@
-<ion-view view-title="{{dash.viewTitle}}">
+<ion-view view-title="{{dash.getViewTitle()}}">
+  <ion-nav-buttons side="primary">
+    <button class="button" ng-click="dash.prevMonth()" style="min-width:85px">
+      {{dash.getPreviousMonthName()}}
+    </button>
+  </ion-nav-buttons>
+  <ion-nav-buttons side="right">
+      <button class="button button-right" ng-click="dash.nextMonth()" style="min-width:85px"
+              ng-if="dash.timeFrame.canMoveForward">
+      {{dash.getNextMonthName()}}
+    </button>
+  
+  </ion-nav-buttons>
+  
   <ion-content>
 
     <div class="item">
-     <div class="dashboard-header">
-       <span class="dash-total">{{dash.currentSold | currency:tran.currency}}</span>
-     </div>
-      
+      <div class="dashboard-header">
+        <span class="dash-total">{{dash.currentSold | currency:tran.currency}}</span>
+      </div>
+
     </div>
 
     <div class="item fake-tabs">

@@ -1,12 +1,10 @@
-/* global _, moment, angular */
-
 (function () {
-  "use strict";
+  'use strict';
 
   angular.module('pf.transactions')
     .controller('TransactionCtrl', TransactionCtrl);
 
-  TransactionCtrl.$inject = ['$stateParams', '$state', '$ionicHistory', 'CONST', 'transactionsDatacontext', 'categories', 'user', 'transaction']
+  TransactionCtrl.$inject = ['$stateParams', '$state', '$ionicHistory', 'CONST', 'transactionsDatacontext', 'categories', 'user', 'transaction'];
   function TransactionCtrl($stateParams, $state, $ionicHistory, CONST, transactionsDatacontext, categories, user, transaction) {
     var self = this;
     this.selectedTransactionType = $stateParams.transactionType;
@@ -18,6 +16,7 @@
 
     this.datepickerObject = {
       titleLabel: 'Select Date',
+      //TODO get last transaction date and set the input date to that
       inputDate: transaction.date.toDate(),
       callback: function (val) {
         self.transaction.date = moment(val);
@@ -35,7 +34,7 @@
 
       transactionsDatacontext.list().then(function (result) {
         self.transactions = result;
-      });
+      });      
     }
 
 
@@ -50,7 +49,7 @@
     function _createTransaction() {
       var newTran = angular.copy(self.transaction);
       transactionsDatacontext.add(newTran)
-        .then(function () {});
+        .then(function () { });
     }
 
     function _delete() {
@@ -63,7 +62,7 @@
       transactionsDatacontext.update(self.transaction)
         .then(function () {
           _goBack();
-        })
+        });
     }
 
     function _goBack() {
@@ -72,14 +71,6 @@
       } else {
         $state.go('dashboard');
       }
-    }
-
-    function addTransaction() {
-      if (self.currentTransaction.id) {
-        transactionsDatacontext.update(self.currentTransaction);
-      } else {
-        transactionsDatacontext.add(self.currentTransaction);
-      } 
     }
   }
 })();

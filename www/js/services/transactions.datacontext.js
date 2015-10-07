@@ -1,17 +1,14 @@
-/* global moment */
-/* global angular */
 (function () {
+	'use strict';
+
 	angular.module('pf.datacontext').factory('transactionsDatacontext', transactionsDatacontext);
 
 	transactionsDatacontext.$inject = ['$q', '$timeout', '$window', '$firebaseArray', '$firebaseUtils', 'categoriesDatacontext', 'Auth', 'CONST', 'errors'];
 	function transactionsDatacontext($q, $timeout, $window, $firebaseArray, $firebaseUtils, categoriesDatacontext, Auth, CONST, errors) {
 		var ref = new $window.Firebase(CONST.FirebaseUrl);
 		var user = Auth.resolveUser();
-		var transactionRef = ref.child('profile').child(user.uid).child('transactions');
-		var transactionsFirebaseArray = _createTransactionsFirebaseArray();
-		var transactions = transactionsFirebaseArray(transactionRef);
 		var _transactionsLoaded = false;
-
+		var transactions = null;
 		_activate();
 
 		return {
@@ -25,15 +22,32 @@
 
 
 		function _activate() {
-			transactions
-				.$loaded()
-				.then(function (data) {
+			getTransactions()
+				.then(function () {
 					_transactionsLoaded = true;
 				});
 		}
 
-		function getTransactions() {
-			return transactions.$loaded();
+		function getTransactions(start, end) {
+			if (!start) {
+				start = moment().startOf('month');
+			}
+
+			if (!end) {
+				end = start.clone().endOf('month');
+			}
+
+			var transactionRef = ref.child('profile').child(user.uid).child('transactions')
+				.orderByChild('date')
+				.startAt(start.unix()).endAt(end.unix());
+
+			var transactionsFirebaseArray = _createTransactionsFirebaseArray();
+			transactions = transactionsFirebaseArray(transactionRef);
+
+			return transactions.$loaded().then(function (data) {
+				_transactionsLoaded = true;
+				return data;
+			});
 		}
 
 		function getByCategory(categoryId, start, end) {
@@ -49,7 +63,8 @@
 				amount: transaction.amount || 0,
 				note: transaction.note || '',
 				category: transaction.category.$id,
-				date: transaction.date.unix()
+				date: transaction.date.unix(),
+				dateFormatted: transaction.date.format()
 			};
 
 			return transactions.$add(newTransaction).then(function (result) {
@@ -60,7 +75,7 @@
 
 		function update(updatedTransaction) {
 			return _getById(updatedTransaction.$id).then(function (transaction) {
-				if (!transaction) return null;
+				if (!transaction) { return null; }
 				// hmm .. better grab a new instance of a transaction otherwise we save all kinds of properties... hmm 
 
 				transaction.amount = updatedTransaction.amount;
@@ -99,11 +114,11 @@
 					deferred.reject(new errors.NotFoundError('Transaction not found'));
 				}
 			} else {
-				transactions.$loaded().then(function (data) {
+				transactions.$loaded().then(function () {
 					var transaction = _.findWhere(transactions, { $id: id });
 					if (transaction) {
 						deferred.resolve(transaction);
-					}else{
+					} else {
 						deferred.reject(new errors.NotFoundError('Transaction not found'));
 					}
 				});
