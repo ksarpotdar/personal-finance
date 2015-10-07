@@ -3,6 +3,7 @@
   
   angular.module('pf.constants', [])
     .constant('CONST', {
+      ISODate: 'YYYY-MM-DDTHH:mm:ssZ',
       TransactionType: {
         Expense: 'expense',
         Income: 'income'
