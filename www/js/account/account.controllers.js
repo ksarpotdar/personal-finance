@@ -1,8 +1,8 @@
 (function () {
-  "use strict";
+  'use strict';
 
   angular.module('pf.account')
-    .controller('AccountCtrl', function ($scope) { })
+    .controller('AccountCtrl', function () { })
     .controller('LoginCtrl', loginCtrl)
     .controller('LogoutCtrl', logoutCtrl)
     .controller('NewAccountCtrl', newAccountCtrl);
@@ -34,6 +34,7 @@
     function activate() {
       //$ionicHistory.clearHistory();
       if (Auth.signedIn()) {
+        debugger;
         _toDashboard();
       }
     }
@@ -54,7 +55,7 @@
       $ionicHistory.nextViewOptions({
         historyRoot: true
       });
-      $state.go('tabs.dashboard', {}, { location: "replace", reload: true });
+      $state.go('tabs.dashboard');
     }
 
   }
@@ -100,6 +101,7 @@
       $ionicHistory.nextViewOptions({
         historyRoot: true
       });
+      debugger;
       $state.go('tabs.dashboard', {}, { location: "replace", reload: true });
     }
   }

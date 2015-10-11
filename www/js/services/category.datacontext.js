@@ -1,6 +1,8 @@
 /* global moment */
 /* global angular */
 (function () {
+	'use strict';
+	
 	angular.module('pf.datacontext').factory('categoriesDatacontext', categoriesDatacontext);
 
 	categoriesDatacontext.$inject = ['$q', '$timeout', '$window', '$firebaseArray', '$firebaseUtils', 'Auth', 'CONST', 'errors'];

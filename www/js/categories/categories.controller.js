@@ -5,8 +5,8 @@
     .controller('CategoriesCtrl', CategoriesCtrl);
 
 
-  CategoriesCtrl.$inject = ['$state', 'CONST', 'categoriesDatacontext', 'logging', 'searchProvider'];
-  function CategoriesCtrl($state, CONST, categoriesDatacontext, logging, searchProvider) {
+  CategoriesCtrl.$inject = ['$state', 'CONST', 'categoriesDatacontext', 'logging'];
+  function CategoriesCtrl($state, CONST, categoriesDatacontext, logging) {
     logging.logDebug('entering CategoriesCtrl');
     
     var self = this;
@@ -16,11 +16,11 @@
 
     activate();
     function activate() {
-      searchProvider.query(
-        { a: 'b' },
-        function (data) {
-          console.log(data);
-        });
+      // searchProvider.query(
+      //   { a: 'b' },
+      //   function (data) {
+      //     console.log(data);
+      //   });
 
       categoriesDatacontext.list().then(function (result) {
         self.categories = result;

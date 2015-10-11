@@ -1,5 +1,6 @@
 /* global angular */
 (function () {
+	'use strict';
 	angular.module('pf.datacontext').factory('Auth', authService);
 
 	authService.$inject = ['$q', '$window', '$rootScope', '$firebaseObject', 'CONST'];
@@ -32,7 +33,7 @@
 				}
 			});
 			return deferred.promise;
-		};
+		}
 
 		function login(username, password) {
 			var deferred = $q.defer();
@@ -44,13 +45,13 @@
 				}
 			});
 			return deferred.promise;
-		};
+		}
 
 		function createProfile(user) {
 			var deferred = $q.defer();
 			var profile = {
 				username: user.password.email,
-				md5_hash: 'XX'
+				'md5_hash': 'XX'
 			};
 
 			var profileRef = ref.child('profile').child(user.uid);
@@ -63,16 +64,16 @@
 			});
 
 			return deferred.promise;
-		};
+		}
 
 		function logout() {
 			ref.unauth();
-		};
+		}
 		function resolveUser() {
 			return ref.getAuth();
-		};
+		}
 		function signedIn() {
 			return !!auth.user.provider;
-		};
+		}
 	}
 })();

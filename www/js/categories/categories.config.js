@@ -1,6 +1,7 @@
 /* global angular */
 
 (function () {
+  'use strict';
   angular.module('pf.categories')
     .config(configuration);
 
@@ -39,7 +40,7 @@
         }
       });
 
-    $urlRouterProvider.otherwise('/category.list');
+    $urlRouterProvider.otherwise('/category/list');
 
 
     _categoriesResolver.$inject = ['$stateParams', 'categoriesDatacontext']
@@ -50,7 +51,7 @@
     _userResolver.$inject = ['Auth'];
     function _userResolver(Auth) {
       return Auth.resolveUser();
-    };
+    }
 
     function _addCategoryResolver() {
       return {

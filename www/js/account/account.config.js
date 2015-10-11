@@ -46,6 +46,6 @@
     _userResolver.$inject = ['Auth'];
     function _userResolver(Auth) {
       return Auth.resolveUser();
-    };
+    }
   }
 })();

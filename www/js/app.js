@@ -3,7 +3,7 @@
 (function () {
   'use strict';
   angular.module('pf', ['ionic', 'ionic-datepicker', 'pf.dashboard', 'pf.account', 'pf.datacontext', 'pf.categories', 'pf.transactions', 'pf.common-directives', 'pf.constants', 'pf.filters', 'pf.logging'])
-    .run(function ($ionicPlatform) {
+    .run(['$ionicPlatform', function ($ionicPlatform) {
       $ionicPlatform.ready(function () {
         // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
         // for form inputs)
@@ -16,13 +16,14 @@
           StatusBar.styleLightContent();
         }
       });
-    })
-    .run(function ($rootScope, $state, Auth) {
+    }])
+    .run(['$rootScope', '$state', 'Auth', function ($rootScope, $state, Auth) {
       $rootScope.$on('$stateChangeStart', function (event, next) {
         if (!Auth.signedIn()) {
           // all controllers need authentication unless otherwise specified
           if (!next.data || !next.data.anonymous) {
             event.preventDefault();
+            debugger;
             $state.go('account.login');
           }
         }
@@ -32,5 +33,5 @@
         console.error('$stateChangeError: ', error);
         console.log(arguments);
       });
-    });
+    }]);
 })();

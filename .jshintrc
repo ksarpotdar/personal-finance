@@ -1,6 +1,7 @@
 {
   "browser": true,
   "jquery": true,
+  "jasmine": true,
   "node": true,
   "esnext": true,
   "bitwise": true,
@@ -32,6 +33,7 @@
     "StatusBar": true,
     "angular": true,
     "_": true,
-    "moment": true
+    "moment": true,
+    "jasmine": true
   }
 }

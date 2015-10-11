@@ -4,6 +4,10 @@
   angular.module('pf.constants', [])
     .constant('CONST', {
       ISODate: 'YYYY-MM-DDTHH:mm:ssZ',
+      RecurrenceState: {
+        toProcess: 'toProcess',
+        processed: 'processed'
+      },
       TransactionType: {
         Expense: 'expense',
         Income: 'income'

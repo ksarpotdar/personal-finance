@@ -115,6 +115,7 @@
 				}
 			} else {
 				transactions.$loaded().then(function () {
+					_transactionsLoaded = true;
 					var transaction = _.findWhere(transactions, { $id: id });
 					if (transaction) {
 						deferred.resolve(transaction);

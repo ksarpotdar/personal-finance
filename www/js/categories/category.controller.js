@@ -1,15 +1,13 @@
-/* global _, moment, angular */
-
-/// <reference path="category.service.js" />
 (function () {
-  "use strict";
+  'use strict';
 
   angular.module('pf.categories')
     .controller('CategoryCtrl', CategoryCtrl);
 
 
-  CategoryCtrl.$inject = ['$state', '$ionicHistory', '$ionicPopup', 'CONST', 'CategoryService', 'category', 'user']
-  function CategoryCtrl($state, $ionicHistory, $ionicPopup, CONST, categoriesService, category, user) {
+  CategoryCtrl.$inject = ['$state', '$ionicHistory', '$ionicPopup', 'CONST', 'CategoryService', 'logging', 'category', 'user'];
+  function CategoryCtrl($state, $ionicHistory, $ionicPopup, CONST, categoriesService, logging, category, user) {
+    logging.logDebug('Entering Add/Edit category controller');
     var self = this;
     this.category = angular.copy(category);
 
@@ -36,7 +34,7 @@
       if (self.category.$id) {
         _updateCategory();
       } else {
-        _addCategory()
+        _addCategory();
       }
     }
 

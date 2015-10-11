@@ -1,8 +1,9 @@
 (function () {
-	"use strict";
+	'use strict';
 
 	angular.module('pf.common-directives').directive('pfSpinnerButton', spinnerButtonDirective);
 
+	spinnerButtonDirective.$inject = ['$compile'];
 	function spinnerButtonDirective($compile) {
 		return {
 			restrict: 'A',

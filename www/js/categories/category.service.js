@@ -6,9 +6,10 @@
   angular.module('pf.categories')
     .factory('CategoryService', categoriesService);
 
-
-  categoriesService.$inject = ['$state', '$q', 'CONST', 'categoriesDatacontext', 'errors'];
-  function categoriesService($state, $q, CONST, categoriesDatacontext, errors) {
+  categoriesService.$inject = ['$state', '$q', 'CONST', 'categoriesDatacontext', 'errors', 'logging'];
+  function categoriesService($state, $q, CONST, categoriesDatacontext, errors, logging) {
+    logging.logDebug('entering categories service');
+    
     /*jshint validthis: true */
     var self = this;
     this.categories = [];
@@ -25,6 +26,7 @@
       categoriesDatacontext.list().then(function (result) {
         self.categories = result;
       });
+      logging.logDebug('activated categories service');
     }
 
     function _add(name, type, user) {           
@@ -33,7 +35,7 @@
       if (_categoryExists(name)) {
         deferred.reject(new errors.DuplicateCategoryNameError('Category with this name already exists.'));
       } else {
-        var newCategory = { user_id: user.uid, type, name: name }; // jshint ignore:line
+        var newCategory = { user_id: user.uid, type: type, name: name }; // jshint ignore:line
         return self.categories.$add(newCategory);
       }
 
