@@ -9,11 +9,8 @@
 		
 		return {
 			processNext: processNext,
-			// add: add,
-			// remove: remove,
-			// update: update,
-			// getById: getById,
-			
+			add: add,
+			remove: remove			
 		};
 
 
@@ -29,12 +26,29 @@
 						_processRecurrenceAndCreateNew(occurrence);
 					}
 				}
+				return occurrence;
 			});
 		}
 
+		function add(transaction, rule) {
+			var nextRunDate = recurrenceCalculator.getNewRunDate(transaction.date, rule);
+			return recurrenceDatacontext.add(transaction.$id, rule, nextRunDate);
+		}
+
+		function remove(transaction) {
+			return recurrenceDatacontext.getById(transaction.recurrenceId).then(function(recurrence){
+				return recurrenceDatacontext.remove(recurrence);
+			});			
+		}
+		
+		function removeFuture(transaction) {
+			return recurrenceDatacontext.getById(transaction.recurrenceId).then(function(recurrence){
+				return recurrenceDatacontext.remove(recurrence);
+			});			
+		}
 
 		function _runTransactionRecurrence(occurrence) {
-			return transactionsDatacontext.single(occurrence.transactionId).then(function (origTransaction) {
+			return transactionsDatacontext.single(occurrence.rootTransactionId).then(function (origTransaction) {
 				var newTran = {};
 
 				newTran.type = origTransaction.type;
@@ -42,7 +56,9 @@
 				newTran.category = origTransaction.category;
 				newTran.date = occurrence.nextRunDate.unix();
 				newTran.formatted = occurrence.nextRunDate.format();
-				newTran.note = '(recurrence)' + origTransaction.note;
+				newTran.note = origTransaction.note;
+				newTran.rootTransactionId = origTransaction.rootTransactionId;
+				newTran.fromRecurrenceId = occurrence.$id;
 
 				return transactionsDatacontext.add(newTran).then(function (savedTransaction) {
 					return savedTransaction;
@@ -58,7 +74,7 @@
 		}
 
 		function _createFromOccurrence(occurrence) {
-			var nextRunDate = recurrenceCalculator.getNewRunDate(occurrence.nextRunDate, occurrence);
+			var nextRunDate = recurrenceCalculator.getNewRunDate(occurrence.nextRunDate, occurrence.rule);
 			recurrenceDatacontext.add(occurrence.transactionId, occurrence.rule, nextRunDate);
 		}
 

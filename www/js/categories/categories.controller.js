@@ -16,12 +16,6 @@
 
     activate();
     function activate() {
-      // searchProvider.query(
-      //   { a: 'b' },
-      //   function (data) {
-      //     console.log(data);
-      //   });
-
       categoriesDatacontext.list().then(function (result) {
         self.categories = result;
       });

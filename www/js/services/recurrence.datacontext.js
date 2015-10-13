@@ -10,11 +10,11 @@
 		var recurrences = null;
 
 		return {
-			getNextOccurence: getNextOccurrence,
+			getNextOccurrence: getNextOccurrence,
 			add: add,
 			remove: remove,
-			update: update,
-			getById: getById			
+			removeFuture: removeFuture,
+			getById: getById
 		};
 
 
@@ -26,7 +26,7 @@
 			var recFirebaseArray = _createRecurrencesFirebaseArray();
 			recurrences = recFirebaseArray(recurrenceRef);
 
-			return recurrences.$loaded().then(function(items){
+			return recurrences.$loaded().then(function (items) {
 				return _(items).orderBy('nextRunDateUnix').take(1).value();
 			});
 		}
@@ -48,55 +48,82 @@
 				dateUpdated: null,
 				$priority: nextRunDate.unix()
 			};
-				
+
 			return recurrences.$add(recurrence);
-			// var recurrence = {
-			// 	dateAdded: moment().format(),
-			// 	nextRunDate: .. some next run date based on rules .. needs to be provided,
-			// 	transactionId: .. from interface ..,
-			// 	rule: '1W, 2W, 3W, 1M', // KISS 1week ...1month
-			//  state: toProcess // after we process it, we update this one to 'processed' and create a new instance.						
-			// };
-			
-			// when a recurrence is processed - let's store the resultingTransactionId .. so we can keep track of it 
-			// when we create a recurrence we need to set the id on the transaction so it's easy to find/edit
-			// need to create a service that holds the logic for running a recurring transaction
-			// need a way to determine if the transaction is late the user opened the app 3 months later
-					// it would be nice to run for all the missing months (weeks). ! Nice to have - not that important !
-					
-			// some other recurring jobs would be ?
-
 		}
 
-		function update(recurrence) {
-			recurrence.dateAdded = recurrence.dateAdded.format();
-			recurrence.nextRunDate = recurrence.nextRunDate.format();
-			recurrence.dateUpdated = moment().format();
+		//TODO: shouldn't really care about updates to the recurrence. Just Remove/Add.
+		// function update(recurrence) {
+		// 	recurrence.
+		// 	recurrence.dateUpdated = moment().format();
 			
-			return recurrences.$save(recurrence).then(function () {
-				//TODO - not happy with this. should be handled in angular fire somehow.
-				recurrence.dateAdded = moment(recurrence.dateAdded, CONST.ISODate);
-				recurrence.nextRunDate = moment(recurrence.nextRunDate, CONST.ISODate);
-				return recurrence;
-			});
-		}
+		// 	return recurrences.$save(recurrence).then(function () {
+		// 		//TODO - not happy with this. should be handled in angular fire somehow.
+		// 		recurrence.dateAdded = moment(recurrence.dateAdded, CONST.ISODate);
+		// 		recurrence.nextRunDate = moment(recurrence.nextRunDate, CONST.ISODate);
+		// 		return recurrence;
+		// 	});
+		// }
 
 		function remove(recurrence) {
-			
+			var deferred = $q.defer();
+			var recurrenceDeleted = false;
+			var transactionsDeleted = false;
+
 			var recurrencesToDeleteRef = ref.child('profile').child(user.uid).child('recurrences/transactions')
 				.orderByChild('transactionId')
 				.startAt(recurrence.transactionId).endAt(recurrence.transactionId);
 
-			var recFirebaseArray = _createRecurrencesFirebaseArray();
-			var recurrencesToDelete = recFirebaseArray(recurrencesToDeleteRef);
+			var transactionsToDeleteRef = ref.child('profile').child(user.uid).child('transactions')
+				.orderByChild('rootTransactionId')
+				.startAt(recurrence.transactionId).endAt(recurrence.rootTransactionId);
 
-			return recurrencesToDelete.$loaded().then(function(items){
-				var allDeletePromises = [];
-				_.each(items, function(item){
-					allDeletePromises.push(recurrencesToDelete.$remove(item));
-				});
-				return $q.all(allDeletePromises);
+			recurrencesToDeleteRef.remove(function () {
+				recurrenceDeleted = true;
+				if (transactionsDeleted) {
+					deferred.resolve();
+				}
 			});
+
+			transactionsToDeleteRef.remove(function () {
+				transactionsDeleted = true;
+				if (recurrenceDeleted) {
+					deferred.resolve();
+				}
+			});
+
+			return deferred.promise;
+		}
+
+		function removeFuture(recurrence) {
+			var deferred = $q.defer();
+			var deletingFutureOccurrence = false;
+
+			var recurrencesToDeleteRef = ref.child('profile').child(user.uid).child('recurrences/transactions')
+				.orderByChild('transactionId')
+				.startAt(recurrence.transactionId).endAt(recurrence.transactionId);
+
+			recurrencesToDeleteRef.on('value', function (snapshot) {
+				var recurrences = snapshot.val();
+				var today = moment().startOf('day');
+				_.each(recurrences, function (rec) {
+					var nextRunDate = moment(rec.nextRunDate, CONST.ISODate);
+					if (nextRunDate.isAfter(today) || nextRunDate.isSame(today)) {
+						deletingFutureOccurrence = true;
+						var recToDelete = ref.child('profile').child(user.uid).child('recurrences/transactions');
+						recToDelete.child(rec.key());
+						recToDelete.remove(function () {
+							deferred.resolve();
+						});
+					}
+				});
+
+				if (!deletingFutureOccurrence) {
+					deferred.resolve();
+				}
+			});
+
+			return deferred.promise;
 		}
 
 		function _createRecurrencesFirebaseArray() {

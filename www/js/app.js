@@ -17,13 +17,12 @@
         }
       });
     }])
-    .run(['$rootScope', '$state', 'Auth', function ($rootScope, $state, Auth) {
+    .run(['$rootScope', '$state', '$timeout', 'logging', 'Auth', function ($rootScope, $state, $timeout, logging, Auth) {
       $rootScope.$on('$stateChangeStart', function (event, next) {
         if (!Auth.signedIn()) {
           // all controllers need authentication unless otherwise specified
           if (!next.data || !next.data.anonymous) {
             event.preventDefault();
-            debugger;
             $state.go('account.login');
           }
         }
@@ -33,5 +32,24 @@
         console.error('$stateChangeError: ', error);
         console.log(arguments);
       });
+
+      // var errorsProcessingRecurrences = 0;
+      // (function processNextRecurrence() {
+      //   recurrenceService.processNext().then(function () {
+      //     $timeout(processNextRecurrence, 60 * 1000);
+      //   }).catch(function (err) {
+      //     logging.logError(err);
+      //     if (errorsProcessingRecurrences > 3) {
+      //       logging.logError('Too many errors processing recurrences - shutting down recurrence processing.');
+      //       return;
+      //     }
+
+      //     errorsProcessingRecurrences += 1;
+          
+      //     $timeout(processNextRecurrence, 60 * 1000);
+      //   });
+
+      // })();
     }]);
+
 })();

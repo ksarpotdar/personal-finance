@@ -1,6 +1,8 @@
 /* global angular */
 
 (function () {
+  'use strict';
+  
   angular.module('pf.account')
     .config(configuration);
 

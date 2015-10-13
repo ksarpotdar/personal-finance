@@ -13,6 +13,21 @@
     this.buttonText = transaction.$id ? 'Update' : 'Add';
     this.transaction = angular.copy(transaction); //create a copy so we can cancel without affecting the original transaction
     this.categories = categories;
+    this.useRecurrence = false;
+    this.recurrencePeriods = [
+      { key: '1W', name: 'Weekly' },
+      { key: '2W', name: 'Bi-Weekly' },
+      { key: '1M', name: 'Monthly' },
+    ];
+    this.weekDayRecurrence = [
+      { long: 'Monday', short: 'Mon' },
+      { long: 'Tuesday', short: 'Tue' },
+      { long: 'Wednesday', short: 'Wed' },
+      { long: 'Thursday', short: 'Thu' },
+      { long: 'Friday', short: 'Fri' },
+      { long: 'Saturday', short: 'Sat' },
+      { long: 'Sunday', short: 'Sun' },
+    ];
 
     this.datepickerObject = {
       titleLabel: 'Select Date',
@@ -20,10 +35,13 @@
       inputDate: transaction.date.toDate(),
       callback: function (val) {
         self.transaction.date = moment(val);
+        self.selectedMonthDayRecurrence = self.transaction.date.date();
       }
     };
 
     this.execute = execute;
+    this.getRecurrenceText = getRecurrenceText;
+    this.recurrencePeriodChange = recurrencePeriodChange;
     this.delete = _delete;
 
     activate();
@@ -34,9 +52,14 @@
 
       transactionsDatacontext.list().then(function (result) {
         self.transactions = result;
-      });      
-    }
+      });
 
+      _initializeRecurrence();
+
+      self.selectedRecurrencePeriod = self.recurrencePeriods[0];
+      self.selectedWeekDayRecurrence = _.findWhere(self.weekDayRecurrence, { short: self.transaction.date.format('DDD') });
+      self.selectedMonthDayRecurrence = self.transaction.date.date();
+    }
 
     function execute() {
       if (self.transaction.$id) {
@@ -44,6 +67,10 @@
       } else {
         _createTransaction();
       }
+    }
+
+    function recurrencePeriodChange() {
+
     }
 
     function _createTransaction() {
@@ -70,6 +97,45 @@
         $ionicHistory.goBack();
       } else {
         $state.go('dashboard');
+      }
+    }
+
+    function _initializeRecurrence() {
+      if (!self.transaction.recurrence) {
+        return;
+      }
+      var rule = self.transaction.recurrence.rule;
+      var parts = rule.split(' ');
+      self.selectedRecurrencePeriod = _.findWhere(self.recurrencePeriods, { key: parts[0] });
+      if (self.selectedRecurrencePeriod && self.selectedRecurrencePeriod.key !== '1M') {
+        //weekly
+        self.selectedWeekDayRecurrence = _.findWhere(self.weekDayRecurrence, { short: parts[1] });
+      } else {
+        //monthly
+        self.selectedMonthDayRecurrence = self.transaction.date.date();
+      }
+    }
+
+    function getRecurrenceText() {
+      if (!self.transaction.recurrence) {
+        return '';
+      }
+      var rule = self.transaction.recurrence.rule;
+      var parts = rule.split(' ');
+      var text = '';
+      var selectedWeekDayRecurrence = '';
+      if (self.selectedRecurrencePeriod && self.selectedRecurrencePeriod.key === '1W') {
+        text = 'Weekly on ';
+        selectedWeekDayRecurrence = _.findWhere(self.weekDayRecurrence, { short: parts[1] });
+        text += selectedWeekDayRecurrence.long;
+      } else if (self.selectedRecurrencePeriod && self.selectedRecurrencePeriod.key === '2W') {
+        text = 'By-Weekly on ';
+        selectedWeekDayRecurrence = _.findWhere(self.weekDayRecurrence, { short: parts[1] });
+        text += selectedWeekDayRecurrence.long;
+      } else {
+        text = 'Monthly on the ';
+        var selectedMonthDayRecurrence = self.transaction.date.date();
+        text += selectedMonthDayRecurrence;
       }
     }
   }
