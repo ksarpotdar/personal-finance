@@ -15,9 +15,9 @@
     this.categories = categories;
     this.useRecurrence = false;
     this.recurrencePeriods = [
-      { key: '1W', name: 'Weekly' },
-      { key: '2W', name: 'Bi-Weekly' },
-      { key: '1M', name: 'Monthly' },
+      { key: '1W', name: '1 Week' },
+      { key: '2W', name: '2 Weeks' },
+      { key: '1M', name: '1 Month' },
     ];
     this.weekDayRecurrence = [
       { long: 'Monday', short: 'Mon' },
