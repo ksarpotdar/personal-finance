@@ -33,16 +33,16 @@
           <ion-toggle ng-model="tran.useRecurrence" ng-checked="tran.useRecurrence" toggle-class="toggle-calm">Recurring</ion-toggle>
           <div ng-if="tran.useRecurrence">
             <label class="item item-input item-select">
-              <span class="input-label">Occurres every:</span>
-              <select ng-model="tran.selectedRecurrencePeriod" ng-options="r.name for r in ::tran.recurrencePeriods" ng-change="tran.recurrencePeriodChange()"></select>
+              <span class="input-label">Happens every:</span>
+              <select ng-model="tran.selectedRecurrencePeriod" ng-options="r.name for r in ::tran.recurrencePeriods"></select>
             </label>
             <label class="item item-input item-select" ng-if="tran.selectedRecurrencePeriod.key === '1W' || tran.selectedRecurrencePeriod.key === '2W'">
               <span class="input-label">On:</span>
               <select ng-model="tran.selectedWeekDayRecurrence" ng-options="r.long for r in ::tran.weekDayRecurrence"></select>
             </label>
-            <label class="item item-input item-select">
-              <span class="input-label">&nbsp;</span>
-              <span style="position:absolute; top: 0; right: 0" ng-if="tran.selectedRecurrencePeriod.key === '1M'"> on day {{tran.selectedMonthDayRecurrence}}</span>
+            <label class="item item-input item-select fake-select" ng-if="tran.selectedRecurrencePeriod.key === '1M'">
+              <span class="input-label">On:</span>
+              <span class="recurrence-monthly-date"> Day {{tran.selectedMonthDayRecurrence}}</span>
             </label>
           </div>
         </li>

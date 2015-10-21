@@ -3,12 +3,13 @@
 
 	angular.module('pf.datacontext').factory('transactionsDatacontext', transactionsDatacontext);
 
-	transactionsDatacontext.$inject = ['$q', '$timeout', '$window', '$firebaseArray', '$firebaseUtils', 'categoriesDatacontext', 'Auth', 'CONST', 'errors'];
-	function transactionsDatacontext($q, $timeout, $window, $firebaseArray, $firebaseUtils, categoriesDatacontext, Auth, CONST, errors) {
+	transactionsDatacontext.$inject = ['$q', '$timeout', '$window', '$firebaseArray', '$firebaseUtils', 'categoriesDatacontext', 'recurrenceDatacontext', 'Auth', 'CONST', 'errors'];
+	function transactionsDatacontext($q, $timeout, $window, $firebaseArray, $firebaseUtils, categoriesDatacontext, recurrenceDatacontext, Auth, CONST, errors) {
 		var ref = new $window.Firebase(CONST.FirebaseUrl);
 		var user = Auth.resolveUser();
 		var _transactionsLoaded = false;
 		var transactions = null;
+
 		_activate();
 
 		return {
@@ -19,24 +20,12 @@
 			update: update,
 			remove: remove,
 		};
-
-
-		function _activate() {
-			getTransactions()
-				.then(function () {
-					_transactionsLoaded = true;
-				});
+		
+		function _activate(){
+			getTransactions();
 		}
 
 		function getTransactions(start, end) {
-			if (!start) {
-				start = moment().startOf('month');
-			}
-
-			if (!end) {
-				end = start.clone().endOf('month');
-			}
-
 			var transactionRef = ref.child('profile').child(user.uid).child('transactions')
 				.orderByChild('date')
 				.startAt(start.unix()).endAt(end.unix());
@@ -84,7 +73,7 @@
 				transaction.type = updatedTransaction.type;
 				transaction.category = updatedTransaction.category.$id;
 
-				return transactions.$save(transaction, ['amount', 'note', 'date', 'type', 'category']).then(function () {
+				return transactions.$save(transaction, ['amount', 'note', 'date', 'type', 'category', 'recurrenceId']).then(function () {
 					//TODO - not happy with this. should be handled in angular fire somehow.
 					transaction.category = updatedTransaction.category;
 					transaction.date = updatedTransaction.date;
@@ -105,6 +94,11 @@
 		}
 
 		function _getById(id) {
+			// CONTINUE HERE !
+			//TODO : redo so that the transaction no longer waits for the collection to load.
+			// ALSO REDO THE UPDATE METHOD
+			
+			
 			var deferred = $q.defer();
 			if (_transactionsLoaded) {
 				var transaction = _.findWhere(transactions, { $id: id });
@@ -134,6 +128,10 @@
 					rec.amountSigned = rec.type === CONST.TransactionType.Expense ? -rec.amount : rec.amount;
 					rec.date = moment.unix(rec.date);
 
+					if (rec.recurrenceId) {
+						rec.recurrence = recurrenceDatacontext.getById(rec.recurrenceId);
+					}
+
 					categoriesDatacontext.get(rec.category).then(function (category) {
 						rec.category = category;
 					});
@@ -145,7 +143,7 @@
 					
 					//FIXME - abstract this save method to a different object to use for both categories and transactions
 					
-					listOfFields = listOfFields || []
+					listOfFields = listOfFields || [];
 
 					if (!listOfFields) {
 						// do a normal save if no list of fields is provided

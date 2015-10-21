@@ -167,3 +167,17 @@ $icons: image-url('img/sprite.png');
 .dash-total{
 	font-weight:bold;
 }
+
+.fake-select:after{
+	content: none;
+}
+
+.recurrence-monthly-date{
+	position:absolute; 
+	top: 0; 
+	right: 0;
+	height: 100%;
+	display:inline-block;
+	line-height: 47px;
+	padding: 0 47px 0 20px;
+}

@@ -10,7 +10,8 @@
 		return {
 			processNext: processNext,
 			add: add,
-			remove: remove			
+			remove: remove,
+			removeFuture: removeFuture			
 		};
 
 
@@ -42,6 +43,8 @@
 		}
 		
 		function removeFuture(transaction) {
+			//TODO: need to remove future occurrences when updating a recurrence
+			throw new Error('Not yet implemented !!!');
 			return recurrenceDatacontext.getById(transaction.recurrenceId).then(function(recurrence){
 				return recurrenceDatacontext.remove(recurrence);
 			});			
