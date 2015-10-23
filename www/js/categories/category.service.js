@@ -8,7 +8,7 @@
 
   categoriesService.$inject = ['$state', '$q', 'CONST', 'categoriesDatacontext', 'errors', 'logging'];
   function categoriesService($state, $q, CONST, categoriesDatacontext, errors, logging) {
-    logging.logDebug('entering categories service');
+    logging.debug('entering categories service');
     
     /*jshint validthis: true */
     var self = this;
@@ -26,7 +26,7 @@
       categoriesDatacontext.list().then(function (result) {
         self.categories = result;
       });
-      logging.logDebug('activated categories service');
+      logging.debug('activated categories service');
     }
 
     function _add(name, type, user) {           

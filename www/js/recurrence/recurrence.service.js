@@ -1,7 +1,7 @@
 (function () {
 	'use strict';
 
-	angular.module('pf.datacontext').factory('recurrenceService', recurrenceService);
+	angular.module('pf.recurrence').factory('recurrenceService', recurrenceService);
 
 	recurrenceService.$inject = ['Auth', 'CONST', 'recurrenceDatacontext', 'transactionsDatacontext', 'recurrenceCalculator'];
 	function recurrenceService(Auth, CONST, recurrenceDatacontext, transactionsDatacontext, recurrenceCalculator) {
@@ -25,6 +25,7 @@
 						// even if we don't run every month (if it's a monthly recurrence), we will still catch up
 						_runTransactionRecurrence(occurrence);
 						_processRecurrenceAndCreateNew(occurrence);
+						processNext();
 					}
 				}
 				return occurrence;
@@ -42,12 +43,8 @@
 			});			
 		}
 		
-		function removeFuture(transaction) {
-			//TODO: need to remove future occurrences when updating a recurrence
-			throw new Error('Not yet implemented !!!');
-			return recurrenceDatacontext.getById(transaction.recurrenceId).then(function(recurrence){
-				return recurrenceDatacontext.remove(recurrence);
-			});			
+		function removeFuture(recurrence) {
+			return recurrenceDatacontext.removeFuture(recurrence);			
 		}
 
 		function _runTransactionRecurrence(occurrence) {
@@ -61,7 +58,7 @@
 				newTran.formatted = occurrence.nextRunDate.format();
 				newTran.note = origTransaction.note;
 				newTran.rootTransactionId = origTransaction.rootTransactionId;
-				newTran.fromRecurrenceId = occurrence.$id;
+				newTran.recurrenceId = occurrence.$id;
 
 				return transactionsDatacontext.add(newTran).then(function (savedTransaction) {
 					return savedTransaction;

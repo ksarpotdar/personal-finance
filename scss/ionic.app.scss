@@ -122,7 +122,7 @@ ion-spinner svg{
 
 $icon-width: 16px;
 $icon-height: 16px;
-$icons: image-url('img/sprite.png');
+$icons: url('/img/sprite.png');
 
 .icon {
   background-image: $icons;
@@ -180,4 +180,13 @@ $icons: image-url('img/sprite.png');
 	display:inline-block;
 	line-height: 47px;
 	padding: 0 47px 0 20px;
+}
+
+.category-type {
+    font-style: italic;
+    font-size: .9rem;
+}
+
+.category-name {
+    font-weight: 500;
 }

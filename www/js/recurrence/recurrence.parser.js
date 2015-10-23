@@ -1,7 +1,7 @@
 (function () {
 	'use strict';
 
-	angular.module('pf.datacontext').factory('recurrenceParser', recurrenceParser);
+	angular.module('pf.recurrence').factory('recurrenceParser', recurrenceParser);
 
 	function recurrenceParser() {
 
@@ -31,7 +31,7 @@
 			}
 
 			if (timeSpan.type === 'week') {
-				day = days[dayRule];
+				day = dayRule;
 			} else {
 				day = parseInt(dayRule, 10);
 			}

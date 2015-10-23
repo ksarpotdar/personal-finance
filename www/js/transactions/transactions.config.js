@@ -1,6 +1,8 @@
 /* global angular */
 
 (function () {
+  'use strict';
+
   angular.module('pf.transactions')
     .config(configuration);
 
@@ -37,7 +39,7 @@
     $urlRouterProvider.otherwise('/dashboard');
 
 
-    _categoriesResolver.$inject = ['$stateParams', 'categoriesDatacontext']
+    _categoriesResolver.$inject = ['$stateParams', 'categoriesDatacontext'];
     function _categoriesResolver($stateParams, categoriesDatacontext) {
       return categoriesDatacontext.list().then(function (categories) {
         return _.filter(categories, function (c) { return !c.deleted; });
@@ -47,7 +49,7 @@
     _userResolver.$inject = ['Auth'];
     function _userResolver(Auth) {
       return Auth.resolveUser();
-    };
+    }
 
     _addTransactionResolver.$inject = ['$stateParams'];
     function _addTransactionResolver($stateParams) {
@@ -63,7 +65,7 @@
     _editTransactionResolver.$inject = ['$stateParams', 'transactionsDatacontext'];
     function _editTransactionResolver($stateParams, transactionsDatacontext) {
       var transactionId = $stateParams.id;
-      return transactionsDatacontext.single(transactionId);
+      return transactionsDatacontext.single(transactionId);      
     }
   }
 })();

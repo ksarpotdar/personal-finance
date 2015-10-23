@@ -5,8 +5,8 @@
     .controller('DashboardCtrl', DashboardCtrl);
 
 
-  DashboardCtrl.$inject = ['$state', 'CONST', 'transactionsDatacontext', 'TimeFrameService'];
-  function DashboardCtrl($state, CONST, transactionsDatacontext, timeFrame) {
+  DashboardCtrl.$inject = ['$state', 'CONST', 'transactionsService', 'TimeFrameService'];
+  function DashboardCtrl($state, CONST, transactionsService, timeFrame) {
     var self = this;
     this.currentSold = 0;
     this.TransactionTypes = CONST.TransactionType;
@@ -29,7 +29,7 @@
     function activate() {
       timeFrame.init();
       self.timeFrame = timeFrame.getCurrentTimeFrame();
-      transactionsDatacontext.list().then(function (result) {
+      transactionsService.list().then(function (result) {
         self.transactions = result;
         _refreshCurrentSold();
       });
@@ -68,7 +68,7 @@
     }
 
     function _refreshData(start, end) {
-      transactionsDatacontext.list(start, end)
+      transactionsService.list(start, end)
         .then(function (result) {
           self.transactions = result;
           _refreshCurrentSold();

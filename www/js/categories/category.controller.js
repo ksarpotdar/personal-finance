@@ -7,7 +7,7 @@
 
   CategoryCtrl.$inject = ['$state', '$ionicHistory', '$ionicPopup', 'CONST', 'CategoryService', 'logging', 'category', 'user'];
   function CategoryCtrl($state, $ionicHistory, $ionicPopup, CONST, categoriesService, logging, category, user) {
-    logging.logDebug('Entering Add/Edit category controller');
+    logging.debug('Entering Add/Edit category controller');
     var self = this;
     this.category = angular.copy(category);
 
@@ -39,16 +39,16 @@
     }
 
     function _addCategory() {
-      categoriesService.add(self.category.name, self.category.type, user).then(function (result) {
-        console.log('wohooo', result);
+      categoriesService.add(self.category.name, self.category.type, user).then(function () {
+        _goBack();
       }).catch(function (result) {
         console.log('oooops', result);
       });
     }
 
     function _updateCategory() {
-      categoriesService.update(self.category).then(function (result) {
-        console.log('wohooo', result);
+      categoriesService.update(self.category).then(function () {
+        _goBack();
       }).catch(function (result) {
         console.log('oooops', result);
       });
@@ -59,13 +59,13 @@
         title: 'NO UNDO',
         template: 'Are you sure you want to delete this category?'
       });
-      
+
       confirmPopup.then(function (res) {
         if (res) {
           categoriesService.delete(self.category);
           _goBack();
         }
-      });      
+      });
     }
 
     function _goBack() {

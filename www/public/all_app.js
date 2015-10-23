@@ -1845,7 +1845,7 @@
       if ($ionicHistory.backView()) {
         $ionicHistory.goBack();
       } else {
-        $state.go('dashboard');
+        $state.go('tabs.dashboard');
       }
     }
   }

@@ -9363,7 +9363,7 @@ ion-spinner svg {
       color: #387ef5; }
 
 .icon {
-  background-image: image-url("img/sprite.png");
+  background-image: url("/img/sprite.png");
   background-repeat: no-repeat;
   width: 16px;
   height: 16px; }
@@ -9407,3 +9407,10 @@ ion-spinner svg {
   display: inline-block;
   line-height: 47px;
   padding: 0 47px 0 20px; }
+
+.category-type {
+  font-style: italic;
+  font-size: .9rem; }
+
+.category-name {
+  font-weight: 500; }

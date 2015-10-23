@@ -10,7 +10,7 @@
 		var loggingKey = moment().startOf('hour').format('YYYY-MM-DDHH:mm:ss');
 
 		return {
-			logDebug: logDebug,
+			debug: logDebug,
 			logError: logError
 		};
 

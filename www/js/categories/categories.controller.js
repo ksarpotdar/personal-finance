@@ -7,7 +7,7 @@
 
   CategoriesCtrl.$inject = ['$state', 'CONST', 'categoriesDatacontext', 'logging'];
   function CategoriesCtrl($state, CONST, categoriesDatacontext, logging) {
-    logging.logDebug('entering CategoriesCtrl');
+    logging.debug('entering CategoriesCtrl');
     
     var self = this;
     this.categories = [];
@@ -22,7 +22,7 @@
     }
 
     function _edit(category) {
-      logging.logDebug('Clicked on edit Category.', category);
+      logging.debug('Clicked on edit Category.', category);
       $state.go('category.edit', { id: category.$id });
     }
   }

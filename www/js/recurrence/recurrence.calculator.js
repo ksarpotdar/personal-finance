@@ -1,7 +1,7 @@
 (function () {
 	'use strict';
 
-	angular.module('pf.datacontext').factory('recurrenceCalculator', recurrenceCalculator);
+	angular.module('pf.recurrence').factory('recurrenceCalculator', recurrenceCalculator);
 
 	recurrenceCalculator.$inject = ['recurrenceParser'];
 	function recurrenceCalculator(recurrenceParser) {

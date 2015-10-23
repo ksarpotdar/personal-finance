@@ -3,14 +3,12 @@
 
 	angular.module('pf.datacontext').factory('transactionsDatacontext', transactionsDatacontext);
 
-	transactionsDatacontext.$inject = ['$q', '$timeout', '$window', '$firebaseArray', '$firebaseUtils', 'categoriesDatacontext', 'recurrenceDatacontext', 'Auth', 'CONST', 'errors'];
-	function transactionsDatacontext($q, $timeout, $window, $firebaseArray, $firebaseUtils, categoriesDatacontext, recurrenceDatacontext, Auth, CONST, errors) {
+	transactionsDatacontext.$inject = ['$q', '$timeout', '$window', 'categoriesDatacontext', 'recurrenceDatacontext', '$firebaseArray', '$firebaseObject', '$firebaseUtils', 'pfFirebaseArray', 'pfFirebaseObject', 'Auth', 'CONST'];
+	function transactionsDatacontext($q, $timeout, $window, categoriesDatacontext, recurrenceDatacontext, $firebaseArray, $firebaseObject, $firebaseUtils, pfFirebaseArray, pfFirebaseObject, Auth, CONST) {
 		var ref = new $window.Firebase(CONST.FirebaseUrl);
 		var user = Auth.resolveUser();
 		var _transactionsLoaded = false;
 		var transactions = null;
-
-		_activate();
 
 		return {
 			list: getTransactions,
@@ -20,10 +18,6 @@
 			update: update,
 			remove: remove,
 		};
-		
-		function _activate(){
-			getTransactions();
-		}
 
 		function getTransactions(start, end) {
 			var transactionRef = ref.child('profile').child(user.uid).child('transactions')
@@ -58,35 +52,37 @@
 
 			return transactions.$add(newTransaction).then(function (result) {
 				categoriesDatacontext.addTransactionToCategory(transaction.category, result.key(), newTransaction);
-				return result;
+				var newTranIdx = transactions.$indexFor(result.key());
+				return transactions[newTranIdx];
 			});
 		}
 
 		function update(updatedTransaction) {
-			return _getById(updatedTransaction.$id).then(function (transaction) {
-				if (!transaction) { return null; }
-				// hmm .. better grab a new instance of a transaction otherwise we save all kinds of properties... hmm 
+			var updateableFields = ['amount', 'note', 'date', 'dateFormatted', 'type', 'category', 'recurrenceId'];
+			//var initialCateg = updatedTransaction.category;
+			//var toUpdate = createFirebaseObject()(updatedTransaction.$ref());
 
-				transaction.amount = updatedTransaction.amount;
-				transaction.note = updatedTransaction.note;
-				transaction.date = updatedTransaction.date.unix();
-				transaction.type = updatedTransaction.type;
-				transaction.category = updatedTransaction.category.$id;
-
-				return transactions.$save(transaction, ['amount', 'note', 'date', 'type', 'category', 'recurrenceId']).then(function () {
-					//TODO - not happy with this. should be handled in angular fire somehow.
-					transaction.category = updatedTransaction.category;
-					transaction.date = updatedTransaction.date;
-					transaction.amountSigned = transaction.type === CONST.TransactionType.Expense ? -transaction.amount : transaction.amount;
-					return transaction;
-				});
+			return updatedTransaction.$loaded().then(function () {
+				prepareForSave(updatedTransaction);
+				return saveTransaction(updatedTransaction);
 			});
+
+			function prepareForSave(tran) {
+				tran.date = tran.date.unix();
+				tran.category = tran.category.$id;
+			}
+
+			function saveTransaction(tran) {
+				return tran.$save(updateableFields).then(function () {
+					return _inflateTransaction(updatedTransaction);
+				});
+			}
 		}
 
 		function remove(transaction) {
 			return _getById(transaction.$id).then(function (tr) {
 				if (tr) {
-					return transactions.$remove(tr);
+					return tr.$remove(tr);
 				} else {
 					return null;
 				}
@@ -94,35 +90,66 @@
 		}
 
 		function _getById(id) {
-			// CONTINUE HERE !
-			//TODO : redo so that the transaction no longer waits for the collection to load.
-			// ALSO REDO THE UPDATE METHOD
-			
-			
-			var deferred = $q.defer();
-			if (_transactionsLoaded) {
-				var transaction = _.findWhere(transactions, { $id: id });
-				if (transaction) {
-					deferred.resolve(transaction);
-				} else {
-					deferred.reject(new errors.NotFoundError('Transaction not found'));
-				}
-			} else {
-				transactions.$loaded().then(function () {
-					_transactionsLoaded = true;
-					var transaction = _.findWhere(transactions, { $id: id });
-					if (transaction) {
-						deferred.resolve(transaction);
-					} else {
-						deferred.reject(new errors.NotFoundError('Transaction not found'));
-					}
-				});
+			var singleTransactionRef = ref.child('profile')
+				.child(user.uid).child('transactions')
+				.child(id);
+
+			var transactionObject = createFirebaseObject();
+
+			return transactionObject(singleTransactionRef).$loaded(function (tran) {
+				// tran.date = moment.unix(tran.date);
+				return _inflateTransaction(tran);
+			});
+		}
+
+		function _inflateTransaction(tran) {
+			if (!moment.isMoment(tran.date)) {
+				tran.date = moment.unix(tran.date);
 			}
-			return deferred.promise;
+
+			var promises = [];
+			if (tran.recurrenceId) {
+				var recPromise = recurrenceDatacontext.getById(tran.recurrenceId).then(function (rec) {
+					tran.recurrence = rec;
+				});
+				promises.push(recPromise);
+			}
+
+			var categPromise = categoriesDatacontext.get(tran.category).then(function (category) {
+				tran.category = category;
+				return tran;
+			});
+
+			promises.push(categPromise);
+
+			return $q.all(promises).then(function () {
+				return tran;
+			});
+		}
+
+		function createFirebaseObject() {
+			return pfFirebaseObject({
+				$$updated: function (snap) {
+					// debugger;
+					var updated = $firebaseObject.prototype.$$updated.call(this, snap);
+					if (updated) {
+						// this.category = initialCateg;
+						// categoriesDatacontext.get(rec.category).then(function (category) {
+						// 	rec.category = category;
+						// });
+						var data = snap.val();
+						if (data) {
+							this.date = moment.unix(data.date);
+						}
+						// this.amountSigned = updatedTransaction.type === CONST.TransactionType.Expense ? -updatedTransaction.amount : updatedTransaction.amount;
+					}
+					return updated;
+				}
+			});
 		}
 
 		function _createTransactionsFirebaseArray() {
-			return $firebaseArray.$extend({
+			return pfFirebaseArray({
 				$$added: function (snap) {
 					var rec = $firebaseArray.prototype.$$added.call(this, snap);
 					rec.amountSigned = rec.type === CONST.TransactionType.Expense ? -rec.amount : rec.amount;
@@ -138,44 +165,26 @@
 
 					return rec;
 				},
-				// https://gist.github.com/katowulf/d0c230f1a7f6b5806a29
-				$save: function (indexOrItem, listOfFields) {
-					
-					//FIXME - abstract this save method to a different object to use for both categories and transactions
-					
-					listOfFields = listOfFields || [];
+				$$updated: function (snap) {
+					// debugger;
+					var updated = $firebaseArray.prototype.$$updated.call(this, snap);
+					if (updated) {
+						var rec = this.$getRecord($firebaseUtils.getKey(snap));
 
-					if (!listOfFields) {
-						// do a normal save if no list of fields is provided
-						return $firebaseArray.prototype.$save.apply(this, arguments);
-					}
+						rec.amountSigned = rec.type === CONST.TransactionType.Expense ? -rec.amount : rec.amount;
+						rec.date = moment.unix(rec.date);
 
-					var self = this;
-					var item = self._resolveItem(indexOrItem);
-					var key = self.$keyAt(item);
-					if (key !== null) {
-						var ref = self.$ref().ref().child(key);
-						var updateFields = pickFields(item, listOfFields);
-						var data = $firebaseUtils.toJSON(updateFields);
+						if (rec.recurrenceId) {
+							rec.recurrence = recurrenceDatacontext.getById(rec.recurrenceId);
+						}
 
-						return $firebaseUtils.doSet(ref, data).then(function () {
-							self.$$notify('child_changed', key);
-							return ref;
+						categoriesDatacontext.get(rec.category).then(function (category) {
+							rec.category = category;
 						});
 					}
-					else {
-						return $firebaseUtils.reject('Invalid record; could determine key for ' + indexOrItem);
-					}
+					return updated;
 				}
 			});
-
-			function pickFields(data, fields) {
-				var out = {};
-				angular.forEach(fields, function (k) {
-					out[k] = data.hasOwnProperty(k) ? data[k] : null;
-				});
-				return out;
-			}
 		}
 	}
 })();

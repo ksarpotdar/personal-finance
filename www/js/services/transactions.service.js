@@ -29,7 +29,7 @@
 				end = start.clone().endOf('month');
 			}
 
-			return transactionsDatacontext.getTransactions(start, end);
+			return transactionsDatacontext.list(start, end);
 		}
 
 		// function getByCategory(categoryId, start, end) {
@@ -42,17 +42,32 @@
 		function add(transaction, recurrenceRule) {
 			return transactionsDatacontext.add(transaction).then(function (tran) {
 				if (recurrenceRule) {
-					return recurrenceService.add(transaction, recurrenceRule).then(function (rec) {
-						transaction.recurrenceId = rec.$id;
-						return transactionsDatacontext.update(transaction);
+					return recurrenceService.add(tran, recurrenceRule).then(function (rec) {
+						tran.recurrenceId = rec.key();
+						return transactionsDatacontext.update(tran);
 					});
 				}
 				return tran;
 			});
 		}
 
-		function update(updatedTransaction) {
-			transactionsDatacontext.update(updatedTransaction);
+		function update(updatedTransaction, recurrenceRule) {
+			var recurrenceChanged = updatedTransaction.recurrence && updatedTransaction.recurrence.rule !== recurrenceRule;
+			var recurrenceRemoved = updatedTransaction.recurrence && !recurrenceRule;
+
+			if (recurrenceChanged || recurrenceRemoved) {
+				recurrenceService.removeFuture(updatedTransaction.recurrence);
+			}
+
+			return transactionsDatacontext.update(updatedTransaction).then(function (tran) {
+				if (recurrenceRule) {
+					return recurrenceService.add(tran, recurrenceRule).then(function (rec) {
+						tran.recurrenceId = rec.key();
+						return transactionsDatacontext.update(tran);
+					});
+				}
+				return tran;
+			});
 		}
 
 		function remove(transaction) {

@@ -1,8 +1,8 @@
 (function () {
 	'use strict';
 
-	angular.module('pf')
-		.factory('$exceptionHandler', exceptionHandler);
+	// angular.module('pf')
+	// 	.factory('$exceptionHandler', exceptionHandler);
 
 	exceptionHandler.$inject = ['$log','logging'];
 	function exceptionHandler($log, logging) {

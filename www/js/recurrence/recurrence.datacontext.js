@@ -1,7 +1,7 @@
 (function () {
 	'use strict';
 
-	angular.module('pf.datacontext').factory('recurrenceDatacontext', recurrenceDatacontext);
+	angular.module('pf.recurrence').factory('recurrenceDatacontext', recurrenceDatacontext);
 
 	recurrenceDatacontext.$inject = ['$q', '$timeout', '$window', '$firebaseArray', '$firebaseObject', '$firebaseUtils', 'Auth', 'CONST'];
 	function recurrenceDatacontext($q, $timeout, $window, $firebaseArray, $firebaseObject, $firebaseUtils, Auth, CONST) {
@@ -45,11 +45,17 @@
 				nextRunDateUnix: nextRunDate.unix(),
 				transactionId: transactionId,
 				state: CONST.RecurrenceState.toProcess,
+				rule: rule,
 				dateUpdated: null,
 				$priority: nextRunDate.unix()
 			};
+			
+			var newRecurrenceRef = ref.child('profile').child(user.uid).child('recurrences/transactions');
+			newRecurrenceRef = newRecurrenceRef.push();
+			var newRecurrence = $firebaseObject(newRecurrenceRef);
 
-			return recurrences.$add(recurrence);
+			_.extend(newRecurrence, recurrence);
+			return newRecurrence.$save();
 		}
 
 		//TODO: shouldn't really care about updates to the recurrence. Just Remove/Add.
