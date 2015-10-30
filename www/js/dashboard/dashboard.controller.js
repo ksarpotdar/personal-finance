@@ -1,19 +1,17 @@
-(function () {
+(function() {
   'use strict';
 
   angular.module('pf.dashboard')
-    .controller('DashboardCtrl', DashboardCtrl);
+      .controller('DashboardCtrl', DashboardCtrl);
 
-
-  DashboardCtrl.$inject = ['$state', 'CONST', 'transactionsService', 'TimeFrameService'];
-  function DashboardCtrl($state, CONST, transactionsService, timeFrame) {
-    var self = this;
+  DashboardCtrl.$inject = ['$state', '$ionicListDelegate', 'CONST', 'transactionsService', 'TimeFrameService'];
+  function DashboardCtrl($state, $ionicListDelegate, CONST, transactionsService, timeFrame) {
+    var _this = this;
     this.currentSold = 0;
     this.TransactionTypes = CONST.TransactionType;
     this.selectedTransactionType = CONST.TransactionType.Expense;
     this.transactions = [];
     this.timeFrame = timeFrame.getCurrentTimeFrame();
-
 
     this.editTransaction = editTransaction;
     this.addDefault = addDefault;
@@ -28,13 +26,11 @@
     activate();
     function activate() {
       timeFrame.init();
-      self.timeFrame = timeFrame.getCurrentTimeFrame();
-      transactionsService.list().then(function (result) {
-        self.transactions = result;
+      _this.timeFrame = timeFrame.getCurrentTimeFrame();
+      transactionsService.list().then(function(result) {
+        _this.transactions = result;
         _refreshCurrentSold();
       });
-      
-      
     }
 
     function addDefault() {
@@ -42,37 +38,38 @@
     }
 
     function editTransaction(transaction) {
-      $state.go('transaction.edit', { id: transaction.$id });
+      $state.go('transaction.edit', {id: transaction.$id});
+      $ionicListDelegate.closeOptionButtons();
     }
 
     function prevMonth() {
-      self.timeFrame = timeFrame.prevMonth();
-      _refreshData(self.timeFrame.start, self.timeFrame.end);
+      _this.timeFrame = timeFrame.prevMonth();
+      _refreshData(_this.timeFrame.start, _this.timeFrame.end);
     }
 
     function nextMonth() {
-      self.timeFrame = timeFrame.nextMonth();
-      _refreshData(self.timeFrame.start, self.timeFrame.end);
+      _this.timeFrame = timeFrame.nextMonth();
+      _refreshData(_this.timeFrame.start, _this.timeFrame.end);
     }
 
     function getPreviousMonthName() {
-      return self.timeFrame.start.clone().add(-1, 'month').format('MMMM');
+      return _this.timeFrame.start.clone().add(-1, 'month').format('MMMM');
     }
 
     function getNextMonthName() {
-      return self.timeFrame.end.clone().add(10, 'days').format('MMMM');
+      return _this.timeFrame.end.clone().add(10, 'days').format('MMMM');
     }
 
     function getViewTitle() {
-      return self.timeFrame.start.format('MMMM');
+      return _this.timeFrame.start.format('MMMM');
     }
 
     function _refreshData(start, end) {
       transactionsService.list(start, end)
-        .then(function (result) {
-          self.transactions = result;
-          _refreshCurrentSold();
-        });
+          .then(function(result) {
+            _this.transactions = result;
+            _refreshCurrentSold();
+          });
     }
 
     function _sortTransactions(val) {
@@ -80,30 +77,30 @@
     }
 
     function _changeTransactionType(newType) {
-      self.selectedTransactionType = newType;
+      _this.selectedTransactionType = newType;
     }
 
     function _refreshCurrentSold(transaction) {
       if (!transaction) {
-        self.currentSold = _.reduce(self.transactions,
-          function (sum, val) {
-            return sum + val.amountSigned;
-          }, 0);
+        _this.currentSold = _.reduce(_this.transactions,
+            function(sum, val) {
+              return sum + val.amountSigned;
+            }, 0);
       } else {
-        self.currentSold += transaction.amountSigned;
+        _this.currentSold += transaction.amountSigned;
       }
     }
 
     function _refreshTransactionCollections() {
-      self.expenseTransactions = _(self.transactions)
-        .where({ type: CONST.TransactionType.Expense })
-        .sortBy('date')
-        .value();
+      _this.expenseTransactions = _(_this.transactions)
+          .where({type: CONST.TransactionType.Expense})
+          .sortBy('date')
+          .value();
 
-      self.incomeTransactions = _(self.transactions)
-        .where({ type: CONST.TransactionType.Income })
-        .sortBy('date')
-        .value();
+      _this.incomeTransactions = _(_this.transactions)
+          .where({type: CONST.TransactionType.Income})
+          .sortBy('date')
+          .value();
     }
   }
 })();

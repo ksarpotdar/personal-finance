@@ -9292,7 +9292,8 @@ a.button {
 
 .log-item-date {
   display: inline-block;
-  padding: 0 10px 0 5px; }
+  padding: 0 10px 0 5px;
+  text-align: center; }
 
 .log-item-category {
   display: inline-block;
@@ -9310,6 +9311,11 @@ a.button {
   color: #797979;
   text-transform: italic;
   font-size: .9rem; }
+
+.log-item-recurring {
+  position: relative;
+  display: block;
+  color: red; }
 
 ion-spinner {
   display: inline-block;
