@@ -9420,3 +9420,29 @@ ion-spinner svg {
 
 .category-name {
   font-weight: 500; }
+
+.unauthenticated-form {
+  display: block;
+  width: 400px;
+  margin: auto; }
+  .unauthenticated-form .button-main {
+    font-size: 1.4rem; }
+  .unauthenticated-form .button-noborder {
+    border: 0; }
+  .unauthenticated-form .item-floating-label {
+    border-width: 0 0 1px 0; }
+  .unauthenticated-form .light-bold {
+    font-weight: 500; }
+  .unauthenticated-form .secondary-action {
+    color: #387ef5; }
+
+.item-input.has-errors {
+  border-bottom: 2px solid #ef473a; }
+
+.item-input.no-errors {
+  border-bottom: 2px solid #33cd5f; }
+
+.form-error-message {
+  display: block;
+  margin: 4px 0 0 16px;
+  color: #ef473a; }

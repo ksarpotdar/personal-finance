@@ -1,6 +1,7 @@
 /* global angular */
 
 (function() {
+  'use strict';
   angular.module('pf')
       .config(['$provide', function($provide) {
         $provide.decorator('$locale', ['$delegate', function($delegate) {
@@ -10,8 +11,8 @@
           }
 
           return $delegate;
-        },]);
-      },])
+        }, ]);
+      }, ])
       .config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
 
         $stateProvider
@@ -23,7 +24,7 @@
               resolve: {
                 user: ['Auth', function(Auth) {
                   return Auth.resolveUser();
-                },],
+                }, ],
               },
             })
             .state('tabs.dashboard', {
@@ -46,6 +47,5 @@
 
         $urlRouterProvider.otherwise('/dashboard');
 
-      },]);
-  'use strict';
+      }, ]);
 })();

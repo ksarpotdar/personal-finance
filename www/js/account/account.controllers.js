@@ -1,8 +1,8 @@
-(function () {
+(function() {
   'use strict';
 
   angular.module('pf.account')
-    .controller('AccountCtrl', function () { })
+    .controller('AccountCtrl', function() { })
     .controller('LoginCtrl', loginCtrl)
     .controller('LogoutCtrl', logoutCtrl)
     .controller('NewAccountCtrl', newAccountCtrl);
@@ -14,15 +14,15 @@
     function activate() {
       Auth.logout();
       $ionicHistory.nextViewOptions({
-        disableBack: true
+        disableBack: true,
       });
       $state.go('account.login');
     }
   }
 
-  loginCtrl.$inject = ['$state', '$timeout', '$location', '$ionicHistory', 'Auth', 'user'];
-  function loginCtrl($state, $timeout, $location, $ionicHistory, Auth, user) {
-    var self = this;
+  loginCtrl.$inject = ['$state', '$ionicHistory', 'Auth'];
+  function loginCtrl($state, $ionicHistory, Auth) {
+    var _this = this;
     this.username = '';
     this.password = '';
     this.loading = false;
@@ -32,7 +32,6 @@
     activate();
 
     function activate() {
-      //$ionicHistory.clearHistory();
       if (Auth.signedIn()) {
         debugger;
         _toDashboard();
@@ -40,31 +39,30 @@
     }
 
     function login() {
-      self.loading = true;
-      self.password = 'asdf';
-      Auth.login(self.username, self.password).then(function () {
-        self.loading = false;
+      _this.loading = true;
+      _this.password = 'asdf';
+
+      Auth.login(_this.username, _this.password).then(function() {
+        _this.loading = false;
         _toDashboard();
-      }).catch(function (err) {
-        self.errorMessage = err;
+      }).catch(function(err) {
+        _this.errorMessage = err;
       });
-      self.loading = true;
+
+      _this.loading = true;
     }
 
     function _toDashboard() {
       $ionicHistory.nextViewOptions({
-        historyRoot: true
+        historyRoot: true,
       });
       $state.go('tabs.dashboard');
     }
-
   }
 
-
-  newAccountCtrl.$inject = ['$state', '$ionicHistory', 'Auth', 'user'];
-  function newAccountCtrl($state, $ionicHistory, Auth, user) {
-    var self = this;
-    this.errorMessage = '';
+  newAccountCtrl.$inject = ['$state', '$ionicHistory', 'Auth'];
+  function newAccountCtrl($state, $ionicHistory, Auth) {
+    var _this = this;
     this.username = '';
     this.password = '';
     this.loading = false;
@@ -73,36 +71,40 @@
 
     activate();
 
-
     function activate() {
       if (Auth.signedIn()) {
         _toDashboard();
       }
     }
 
-    function createAccount() {
-      self.errorMessage = '';
-      self.loading = true;
+    function createAccount(form) {
+      if(form.$invalid){
+        return;
+      }
+      
+      _this.errorMessage = '';
+      _this.loading = true;
 
-      Auth.register(self.username, self.password).then(function () {
-        return Auth.login(self.username, self.password).then(function (result) {
-          return Auth.createProfile(result).then(function () {
-            self.loading = false;
+      Auth.register(_this.username, _this.password).then(function() {
+        return Auth.login(_this.username, _this.password).then(function(result) {
+          return Auth.createProfile(result).then(function() {
+            _this.loading = false;
             _toDashboard();
           });
         });
-      }).catch(function (err) {
-        self.errorMessage = err;
+      }).catch(function(err) {
+        _this.errorMessage = err;
       });
-      self.loading = true;
+
+      _this.loading = true;
     }
 
     function _toDashboard() {
       $ionicHistory.nextViewOptions({
-        historyRoot: true
+        historyRoot: true,
       });
       debugger;
-      $state.go('tabs.dashboard', {}, { location: "replace", reload: true });
+      $state.go('tabs.dashboard', {}, { location: 'replace', reload: true });
     }
   }
 

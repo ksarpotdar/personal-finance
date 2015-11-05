@@ -1,36 +1,26 @@
-<!--<ion-view view-title="{{chat.name}}">
-  <ion-content class="padding">
-    <img ng-src="{{chat.face}}" style="width: 64px; height: 64px">
-    <p>
-      {{chat.lastText}}
-    </p>
-  </ion-content>
-</ion-view>-->
-
 <ion-view view-title="Login">
-  <ion-content class="padding">
-    <div class="list card">
-      <div class="item item-divider">Login</div>
-      <div class="item item-body">
-        <div>
-          <form ng-submit="login.submit()">
-            <label class="item item-input">
-              <input type='text' ng-model='login.username' placeholder="firstname">
-            </label>
-            <div class='padding'>
-              <button type='submit' pf-spinner-button='login.loading' class='button button-balanced'>
-                Login
-              </button>
+    <ion-content>
+        <form ng-submit="login.submit()" class="unauthenticated-form">
+            <div class="padding"></div>
+            <div class="list">
+                <label class="item item-input item-floating-label">
+                    <span class="input-label">Username</span>
+                    <input type='text' ng-model='login.username' placeholder="Username" autofocus>
+                </label>
+                <label class="item item-input item-floating-label">
+                    <span class="input-label">Password</span>
+                    <input type='password' ng-model='login.password' placeholder="Password">
+                </label>
             </div>
             <div class='padding'>
-              <a ui-sref='account.new' class='button button-balanced'>
-                New Account
+                <button type='submit' pf-spinner-button='login.loading' class='button button-block button-balanced button-main'>
+                    Login
+                </button>
+                <a ui-sref='account.new' class='button button-block button-light button-noborder'>
+                    Don't have an account? <b class="light-bold secondary-action">Create One</b>
                 </a>
-              </button>
             </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </ion-content>
+        </form>
+
+    </ion-content>
 </ion-view>

@@ -1,30 +1,45 @@
 <ion-view view-title="New Account">
-  <ion-content class="padding">
-    <div class="list card">
-      <div class="item item-body">
-        <div>
-          <form ng-submit="new.submit()">
-            <label class="item item-input">
-              <input type='text' ng-model='new.username' placeholder="email" autofocus>
-            </label>
-            
-            <label class="item item-input">
-              <input type='text' ng-model='new.password' placeholder="password">
-            </label>
-            <div class='padding'>
-              <button type='submit' pf-spinner-button='new.loading' class='button button-balanced'>
-                New Account
-              </button>
+    <ion-content class="">
+
+        <form ng-submit="new.submit(newAccountFrm)" name="newAccountFrm" class="unauthenticated-form"
+              novalidate>
+
+            <div class="list">
+                <label class="item item-input item-floating-label"
+                       ng-class="{ 'has-errors' : (newAccountFrm.username.$invalid && newAccountFrm.$submitted) || newAccountFrm.username.$error.email,
+                                   'no-errors' : newAccountFrm.username.$valid && newAccountFrm.username.$dirty}">
+                    <span class="input-label">Email</span>
+                    <input type='email' ng-model='new.username' name="username" placeholder="Email" autofocus required>
+                </label>
+                <ng-messages for="newAccountFrm.username.$error" role="alert"
+                             ng-if="newAccountFrm.username.$touched || newAccountFrm.$submitted">
+                  <ng-message when="required" class="form-error-message">Username is required</ng-message>
+                  <ng-message when="email" class="form-error-message">Whooops, doesn't look like a valid email</ng-message>
+                </ng-messages>
+
+                <label class="item item-input item-floating-label"
+                       ng-class="{ 'has-errors' : newAccountFrm.password.$invalid
+                                                && (newAccountFrm.$submitted
+                                                    || newAccountFrm.password.$dirty
+                                                    || newAccountFrm.password.$touched),
+                                   'no-errors' : newAccountFrm.password.$valid && newAccountFrm.password.$dirty}">
+                    <span class="input-label">Password</span>
+                    <input type='password' ng-model='new.password' name="password" placeholder="Password" required>
+                </label>
+                <ng-messages for="newAccountFrm.password.$error" role="alert"
+                             ng-if="newAccountFrm.password.$touched || newAccountFrm.$submitted">
+                  <ng-message when="required" class="form-error-message">Password is required</ng-message>
+                </ng-messages>
             </div>
             <div class='padding'>
-              <a ui-sref='account.login' class='button'>
-                Login
+                <button type='submit' pf-spinner-button='new.loading' class='button button-block button-balanced button-main'>
+                    New Account
+                </button>
+                <a ui-sref='account.login' class='button button-block button-light button-noborder'>
+                    Already have an account? <b class="light-bold secondary-action">Login</b>
                 </a>
-              </button>
             </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </ion-content>
+        </form>
+
+    </ion-content>
 </ion-view>

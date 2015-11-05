@@ -198,3 +198,42 @@ $icons: url('/img/sprite.png');
   font-weight: 500;
 }
 
+.unauthenticated-form {
+  display: block;
+  width: 400px;
+  margin: auto;
+
+  .button-main {
+    font-size: 1.4rem;
+  }
+
+  .button-noborder {
+    border: 0;
+  }
+
+  .item-floating-label {
+    border-width: 0 0 1px 0;
+  }
+
+  .light-bold {
+    font-weight: 500;
+  }
+
+  .secondary-action{
+    color: $positive;
+  }
+}
+
+.item-input{
+  &.has-errors{
+    border-bottom:2px solid $assertive;
+  }
+  &.no-errors{
+    border-bottom:2px solid $balanced;
+  }
+}
+.form-error-message{
+  display:block;
+  margin:4px 0 0 16px;
+  color: $assertive;
+}
