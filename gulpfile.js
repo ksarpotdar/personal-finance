@@ -48,7 +48,7 @@ gulp.task('copy-fonts', function() {
 //    .pipe(debug({name:'tpl-dev'}));
 //});
 
-gulp.task('combine-scripts-css', function() {
+gulp.task('combine-scripts-css', ['tpl'], function() {
   return gulp.src('www/index.html')
     .pipe(useref())
     .pipe(gulp.dest('dist'));
@@ -81,4 +81,4 @@ gulp.task('watch', function() {
 
 gulp.task('default', ['sass', 'jshint', 'tpl', 'combine-scripts-css']);
 gulp.task('dev', ['sass', 'jshint', 'tpl', 'combine-scripts-css']);
-gulp.task('prod', ['sass', 'jshint', 'tpl', 'combine-scripts-css', 'copy-images', 'copy-fonts']);
+gulp.task('prod', ['sass', 'jshint', 'combine-scripts-css', 'copy-images', 'copy-fonts']);
