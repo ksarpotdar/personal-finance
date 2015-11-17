@@ -42,6 +42,6 @@
   "cordovaPlatforms": [],
   "scripts": {
     "start": "node server.js",
-    "postinstall": "bash ./post_install.sh"
+    "postinstall": "bower install && gulp prod"
   }
 }
