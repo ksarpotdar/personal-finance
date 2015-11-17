@@ -9,6 +9,7 @@
 
     return {
       list: getTransactions,
+      listByCategory: getByCategory,
       getTransactions: getTransactions,
       add: add,
       update: update,
@@ -31,12 +32,12 @@
       return transactionsDatacontext.list(start, end);
     }
 
-    // function getByCategory(categoryId, start, end) {
-    // 	var categoryRef = categoriesDatacontext.categoryRef;
-    // 	categoryRef.child(categoryId).child('transactions').once('value', function (trSnap) {
-    // 		debugger;
-    // 	});
-    // }
+    function getByCategory(categoryId, start, end) {
+      var categoryRef = categoriesDatacontext.categoryRef;
+      categoryRef.child(categoryId).child('transactions').once('value', function(trSnap) {
+        debugger;
+      });
+    }
 
     function add(transaction, recurrenceRule) {
       return transactionsDatacontext.add(transaction).then(function(tran) {
@@ -53,7 +54,7 @@
 
     function update(updatedTransaction, recurrenceRule) {
       var recurrenceChanged = updatedTransaction.recurrence && updatedTransaction.recurrence.rule !== recurrenceRule,
-          recurrenceRemoved = updatedTransaction.recurrence && !recurrenceRule;
+        recurrenceRemoved = updatedTransaction.recurrence && !recurrenceRule;
 
       if (recurrenceChanged || recurrenceRemoved) {
         recurrenceService.removeFuture(updatedTransaction.recurrence);

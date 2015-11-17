@@ -6,9 +6,9 @@
   transactionsDatacontext.$inject = ['$q', '$window', 'categoriesDatacontext', 'recurrenceDatacontext', '$firebaseArray', '$firebaseObject', '$firebaseUtils', 'pfFirebaseArray', 'pfFirebaseObject', 'Auth', 'CONST'];
   function transactionsDatacontext($q, $window, categoriesDatacontext, recurrenceDatacontext, $firebaseArray, $firebaseObject, $firebaseUtils, pfFirebaseArray, pfFirebaseObject, Auth, CONST) {
     var ref = new $window.Firebase(CONST.FirebaseUrl),
-        user = Auth.resolveUser(),
-        _transactionsLoaded = false,
-        transactions = null;
+      user = Auth.resolveUser(),
+      _transactionsLoaded = false,
+      transactions = null;
 
     return {
       list: getTransactions,
@@ -20,10 +20,11 @@
     };
 
     function getTransactions(start, end) {
+      _ensureUser();
       var transactionRef = ref.child('profile').child(user.uid).child('transactions')
-              .orderByChild('date')
-              .startAt(start.unix()).endAt(end.unix()),
-          transactionsFirebaseArray = _createTransactionsFirebaseArray();
+        .orderByChild('date')
+        .startAt(start.unix()).endAt(end.unix()),
+        transactionsFirebaseArray = _createTransactionsFirebaseArray();
 
       transactions = transactionsFirebaseArray(transactionRef);
 
@@ -34,6 +35,7 @@
     }
 
     function getByCategory(categoryId, start, end) {
+      _ensureUser();
       var categoryRef = categoriesDatacontext.categoryRef;
       categoryRef.child(categoryId).child('transactions').once('value', function(trSnap) {
         debugger;
@@ -62,9 +64,10 @@
     }
 
     function update(updatedTransaction) {
+      _ensureUser();
       var updateableFields = ['amount', 'note', 'date', 'dateFormatted',
         'type', 'category', 'recurrenceId',
-        'rootTransactionId',];
+        'rootTransactionId', ];
 
       prepareForSave(updatedTransaction);
       return saveTransaction(updatedTransaction);
@@ -82,6 +85,7 @@
     }
 
     function remove(transaction) {
+      _ensureUser();
       return _getById(transaction.$id).then(function(tr) {
         if (tr) {
           return tr.$remove(tr);
@@ -93,9 +97,9 @@
 
     function _getById(id) {
       var singleTransactionRef = ref.child('profile')
-              .child(user.uid).child('transactions')
-              .child(id),
-          transactionObject = _createFirebaseObject();
+        .child(user.uid).child('transactions')
+        .child(id),
+        transactionObject = _createFirebaseObject();
 
       return transactionObject(singleTransactionRef).$loaded(_inflateTransaction);
     }
@@ -155,6 +159,10 @@
           return updated;
         },
       });
+    }
+
+    function _ensureUser() {
+      user = Auth.resolveUser();
     }
 
     function _createTransactionsFirebaseArray() {

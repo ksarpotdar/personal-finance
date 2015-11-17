@@ -9446,3 +9446,7 @@ ion-spinner svg {
   display: block;
   margin: 4px 0 0 16px;
   color: #ef473a; }
+
+.generic-form-error {
+  margin: 0 0 0 16px;
+  color: #ef473a; }

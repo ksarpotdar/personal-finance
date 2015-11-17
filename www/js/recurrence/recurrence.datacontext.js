@@ -3,11 +3,12 @@
 
   angular.module('pf.recurrence').factory('recurrenceDatacontext', recurrenceDatacontext);
 
-  recurrenceDatacontext.$inject = ['$q', '$timeout', '$window', '$firebaseArray', '$firebaseObject', '$firebaseUtils', 'Auth', 'CONST'];
-  function recurrenceDatacontext($q, $timeout, $window, $firebaseArray, $firebaseObject, $firebaseUtils, Auth, CONST) {
-    var ref = new $window.Firebase(CONST.FirebaseUrl);
-    var user = Auth.resolveUser();
-    var recurrences = null;
+  recurrenceDatacontext.$inject = ['$q', '$window', '$firebaseArray', '$firebaseObject', 'Auth', 'CONST'];
+  function recurrenceDatacontext($q, $window, $firebaseArray, $firebaseObject, Auth, CONST) {
+    //noinspection JSUnresolvedFunction
+    var ref = new $window.Firebase(CONST.FirebaseUrl),
+      user = null,
+      recurrences = null;
 
     return {
       getNextOccurrence: getNextOccurrence,
@@ -19,11 +20,12 @@
     };
 
     function getNextOccurrence() {
+      _ensureUser();
       var recurrenceRef = ref.child('profile').child(user.uid).child('recurrences/transactions')
-          .orderByChild('state')
-          .startAt('toProcess').endAt('toProcess');
+        .orderByChild('state')
+        .startAt('toProcess').endAt('toProcess'),
+        recFirebaseArray = _createRecurrencesFirebaseArray();
 
-      var recFirebaseArray = _createRecurrencesFirebaseArray();
       recurrences = recFirebaseArray(recurrenceRef);
 
       return recurrences.$loaded().then(function(items) {
@@ -38,23 +40,23 @@
 
     function getById(id) {
       var recurrenceRef = ref.child('profile').child(user.uid).child('recurrences/transactions')
-          .child(id);
+        .child(id);
 
       return $firebaseObject(recurrenceRef).$loaded();
     }
 
     function add(transactionId, rule, nextRunDate) {
       var recurrence = {
-            dateAdded: moment().format(),
-            nextRunDate: nextRunDate.format(),
-            nextRunDateUnix: nextRunDate.unix(),
-            rootTransactionId: transactionId,
-            state: CONST.RecurrenceState.toProcess,
-            rule: rule,
-            dateUpdated: null,
-            $priority: nextRunDate.unix(),
-          },
-          newRecurrenceRef = ref.child('profile').child(user.uid).child('recurrences/transactions');
+          dateAdded: moment().format(),
+          nextRunDate: nextRunDate.format(),
+          nextRunDateUnix: nextRunDate.unix(),
+          rootTransactionId: transactionId,
+          state: CONST.RecurrenceState.toProcess,
+          rule: rule,
+          dateUpdated: null,
+          $priority: nextRunDate.unix(),
+        },
+        newRecurrenceRef = ref.child('profile').child(user.uid).child('recurrences/transactions');
 
       newRecurrenceRef = newRecurrenceRef.push();
       var newRecurrence = $firebaseObject(newRecurrenceRef);
@@ -64,6 +66,8 @@
     }
 
     function markRan(recurrence) {
+      _ensureUser();
+
       recurrence.state = 'processed';
       recurrence.nextRunDate = recurrence.nextRunDate.format();
       recurrence.dateAdded = recurrence.dateAdded.format();
@@ -75,15 +79,17 @@
     }
 
     function remove(recurrence) {
+      _ensureUser();
+
       var deferred = $q.defer(),
-          recurrenceDeleted = false,
-          transactionsDeleted = false,
-          recurrencesToDeleteRef = ref.child('profile').child(user.uid).child('recurrences/transactions')
-              .orderByChild('transactionId')
-              .startAt(recurrence.transactionId).endAt(recurrence.transactionId),
-          transactionsToDeleteRef = ref.child('profile').child(user.uid).child('transactions')
-              .orderByChild('rootTransactionId')
-              .startAt(recurrence.transactionId).endAt(recurrence.rootTransactionId);
+        recurrenceDeleted = false,
+        transactionsDeleted = false,
+        recurrencesToDeleteRef = ref.child('profile').child(user.uid).child('recurrences/transactions')
+          .orderByChild('transactionId')
+          .startAt(recurrence.transactionId).endAt(recurrence.transactionId),
+        transactionsToDeleteRef = ref.child('profile').child(user.uid).child('transactions')
+          .orderByChild('rootTransactionId')
+          .startAt(recurrence.transactionId).endAt(recurrence.rootTransactionId);
 
       recurrencesToDeleteRef.remove(function() {
         recurrenceDeleted = true;
@@ -103,15 +109,16 @@
     }
 
     function removeFuture(recurrence) {
+      _ensureUser();
       var deferred = $q.defer(),
-          deletingFutureOccurrence = false,
-          recurrencesToDeleteRef = ref.child('profile').child(user.uid).child('recurrences/transactions')
-              .orderByChild('transactionId')
-              .startAt(recurrence.transactionId).endAt(recurrence.transactionId);
+        deletingFutureOccurrence = false,
+        recurrencesToDeleteRef = ref.child('profile').child(user.uid).child('recurrences/transactions')
+          .orderByChild('transactionId')
+          .startAt(recurrence.transactionId).endAt(recurrence.transactionId);
 
       recurrencesToDeleteRef.on('value', function(snapshot) {
         var recurrences = snapshot.val(),
-            today = moment().startOf('day');
+          today = moment().startOf('day');
 
         _.each(recurrences, function(rec) {
           var nextRunDate = moment(rec.nextRunDate, CONST.ISODate);
@@ -143,6 +150,10 @@
           return rec;
         },
       });
+    }
+
+    function _ensureUser() {
+      user = Auth.resolveUser();
     }
   }
 })();

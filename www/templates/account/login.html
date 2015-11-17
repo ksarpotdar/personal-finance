@@ -1,16 +1,36 @@
 <ion-view view-title="Login">
     <ion-content>
-        <form ng-submit="login.submit()" class="unauthenticated-form">
+        <form ng-submit="login.submit(loginFrm)" name="loginFrm" class="unauthenticated-form" novalidate>
             <div class="padding"></div>
             <div class="list">
-                <label class="item item-input item-floating-label">
-                    <span class="input-label">Username</span>
-                    <input type='text' ng-model='login.username' placeholder="Username" autofocus>
+                <label class="item item-input item-floating-label"
+                       ng-class="{ 'has-errors' : (loginFrm.username.$invalid && loginFrm.$submitted) || loginFrm.username.$error.email,
+                                   'no-errors' : loginFrm.username.$valid && loginFrm.username.$dirty}">
+                    <span class="input-label">Email</span>
+                    <input type='email' ng-model='login.username' name="username" placeholder="Email" autofocus required>
                 </label>
-                <label class="item item-input item-floating-label">
+                <ng-messages for="loginFrm.username.$error" role="alert"
+                             ng-if="loginFrm.username.$touched || loginFrm.$submitted">
+                  <ng-message when="required" class="form-error-message">Email is required</ng-message>
+                  <ng-message when="email" class="form-error-message">Whooops, doesn't look like a valid email</ng-message>
+                </ng-messages>
+
+                <label class="item item-input item-floating-label"
+                       ng-class="{ 'has-errors' : loginFrm.password.$invalid
+                                                && (loginFrm.$submitted
+                                                    || loginFrm.password.$dirty
+                                                    || loginFrm.password.$touched),
+                                   'no-errors' : loginFrm.password.$valid && loginFrm.password.$dirty}">
                     <span class="input-label">Password</span>
-                    <input type='password' ng-model='login.password' placeholder="Password">
+                    <input type='password' ng-model='login.password' name="password" placeholder="Password" required>
                 </label>
+                <ng-messages for="loginFrm.password.$error" role="alert"
+                             ng-if="loginFrm.password.$touched || loginFrm.$submitted">
+                  <ng-message when="required" class="form-error-message">Password is required</ng-message>
+                </ng-messages>
+            </div>
+            <div ng-if="login.errorMessage" class="generic-form-error">
+                {{ login.errorMessage }}
             </div>
             <div class='padding'>
                 <button type='submit' pf-spinner-button='login.loading' class='button button-block button-balanced button-main'>

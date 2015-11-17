@@ -2,7 +2,8 @@
 
 (function() {
   'use strict';
-  angular.module('pf', ['ionic', 'ionic-datepicker', 'pf.dashboard', 'pf.account', 'pf.datacontext', 'pf.categories', 'pf.transactions', 'pf.common-directives', 'pf.recurrence-runner', 'pf.constants', 'pf.filters', 'pf.logging'])
+  angular.module('pf', ['ionic', 'ionic-datepicker', 'chart.js', 'pf.dashboard', 'pf.charts', 'pf.account', 'pf.datacontext', 'pf.categories', 'pf.transactions',
+                        'pf.common-directives', 'pf.recurrence-runner', 'pf.constants', 'pf.filters', 'pf.logging'])
     .run(['$ionicPlatform', function($ionicPlatform) {
       $ionicPlatform.ready(function() {
         // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard

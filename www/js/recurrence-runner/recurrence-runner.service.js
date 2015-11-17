@@ -6,10 +6,12 @@
   recurrenceRunnerService.$inject = ['$timeout', 'Auth', 'CONST', 'recurrenceDatacontext', 'transactionsDatacontext', 'recurrenceCalculator', 'logging'];
   function recurrenceRunnerService($timeout, Auth, CONST, recurrenceDatacontext, transactionsDatacontext, recurrenceCalculator, logging) {
     var _started = false,
-        _errorsProcessingRecurrences = 0;
+      _errorsProcessingRecurrences = 0,
+      _nextProcessPromise = 0;
 
     return {
       start: start,
+      stop: stop,
       isStarted: isStarted,
     };
 
@@ -24,6 +26,11 @@
 
     function isStarted() {
       return _started;
+    }
+
+    function stop() {
+      $timeout.cancel(_nextProcessPromise);
+      _started = false;
     }
 
     function _processNext() {
@@ -45,10 +52,10 @@
             }).catch(_recurrenceRunnerError);
 
           } else {
-            $timeout(_processNext, 10 * 1000);
+            _nextProcessPromise = $timeout(_processNext, 10 * 1000);
           }
         } else {
-          $timeout(_processNext, 10 * 1000);
+          _nextProcessPromise = $timeout(_processNext, 10 * 1000);
         }
 
         return occurrence;
@@ -64,7 +71,7 @@
 
       _errorsProcessingRecurrences += 1;
 
-      $timeout(_processNext, 60 * 1000);
+      _nextProcessPromise = $timeout(_processNext, 60 * 1000);
     }
 
     function _runTransactionRecurrence(occurrence) {

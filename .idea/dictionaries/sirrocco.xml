@@ -4,6 +4,9 @@
       <w>categ</w>
       <w>datacontext</w>
       <w>firebase</w>
+      <w>gutil</w>
+      <w>minify</w>
+      <w>updateable</w>
     </words>
   </dictionary>
 </component>
