@@ -42,7 +42,6 @@
   "cordovaPlatforms": [],
   "scripts": {
     "start": "node server.js",
-    //"start:dev": "export NODE_ENV=development && node scripts/web.js",
     "postinstall": "bash ./post_install.sh"
   }
 }
