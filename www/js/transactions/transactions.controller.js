@@ -1,12 +1,13 @@
-(function () {
+(function() {
   'use strict';
 
   angular.module('pf.transactions')
     .controller('TransactionCtrl', TransactionCtrl);
 
-  TransactionCtrl.$inject = ['$stateParams', '$state', '$ionicHistory', '$ionicPopup', 'CONST', 'transactionsService', 'recurrenceParser', 'categories', 'user', 'transaction', 'logging'];
-  function TransactionCtrl($stateParams, $state, $ionicHistory, $ionicPopup, CONST, transactionsService, recurrenceParser, categories, user, transaction, logging) {
-    var self = this;
+  TransactionCtrl.$inject = ['$stateParams', '$state', '$ionicHistory', '$ionicPopup', 'CONST', 'transactionsService', 'recurrenceParser', 'categories', 'transaction', 'logging'];
+  function TransactionCtrl($stateParams, $state, $ionicHistory, $ionicPopup, CONST, transactionsService, recurrenceParser, categories, transaction, logging) {
+    var _this = this;
+
     this.selectedTransactionType = $stateParams.transactionType;
     this.isExpense = $stateParams.transactionType === CONST.TransactionType.Expense;
     this.isIncome = !this.isExpense;
@@ -15,29 +16,30 @@
     this.categories = categories;
     this.useRecurrence = false;
     this.recurrencePeriods = [
-      { key: '1W', name: '1 Week' },
-      { key: '2W', name: '2 Weeks' },
-      { key: '1M', name: '1 Month' },
+      {key: '1W', name: '1 Week'},
+      {key: '2W', name: '2 Weeks'},
+      {key: '1M', name: '1 Month'},
     ];
 
     this.weekDayRecurrence = [
-      { long: 'Monday', short: 'Mon' },
-      { long: 'Tuesday', short: 'Tue' },
-      { long: 'Wednesday', short: 'Wed' },
-      { long: 'Thursday', short: 'Thu' },
-      { long: 'Friday', short: 'Fri' },
-      { long: 'Saturday', short: 'Sat' },
-      { long: 'Sunday', short: 'Sun' },
+      {long: 'Monday', short: 'Mon'},
+      {long: 'Tuesday', short: 'Tue'},
+      {long: 'Wednesday', short: 'Wed'},
+      {long: 'Thursday', short: 'Thu'},
+      {long: 'Friday', short: 'Fri'},
+      {long: 'Saturday', short: 'Sat'},
+      {long: 'Sunday', short: 'Sun'},
     ];
 
     this.datepickerObject = {
       titleLabel: 'Select Date',
+
       //TODO get last transaction date and set the input date to that
       inputDate: transaction.date.toDate(),
-      callback: function (val) {
-        self.transaction.date = moment(val);
-        self.selectedMonthDayRecurrence = self.transaction.date.date();
-      }
+      callback: function(val) {
+        _this.transaction.date = moment(val);
+        _this.selectedMonthDayRecurrence = _this.transaction.date.date();
+      },
     };
 
     this.execute = execute;
@@ -46,36 +48,37 @@
 
     activate();
     function activate() {
-      if (!self.transaction.$id) {
-        self.transaction.category = categories[0];
+      if (!_this.transaction.$id) {
+        _this.transaction.category = categories[0];
       }
 
-      transactionsService.list().then(function (result) {
-        self.transactions = result;
+      transactionsService.list().then(function(result) {
+        _this.transactions = result;
       });
 
       _initializeDefaultRecurrence();
 
-      if (self.transaction.recurrenceId) {
-        _initializeExistingRecurrence(self.transaction.recurrence);
+      if (_this.transaction.recurrenceId) {
+        _initializeExistingRecurrence(_this.transaction.recurrence);
       }
     }
 
     function execute() {
-      if (self.transaction.$id) {
+      if (_this.transaction.$id) {
         _updateTransaction();
       } else {
         _createTransaction();
       }
+
       _goBack();
     }
 
     function _createTransaction() {
-      var newTran = angular.copy(self.transaction);
+      var newTran = angular.copy(_this.transaction);
       var rule = '';
 
-      if (self.useRecurrence) {
-        rule = recurrenceParser.toRule(self.selectedRecurrencePeriod.key, self.selectedWeekDayRecurrence.short, self.selectedMonthDayRecurrence);
+      if (_this.useRecurrence) {
+        rule = recurrenceParser.toRule(_this.selectedRecurrencePeriod.key, _this.selectedWeekDayRecurrence.short, _this.selectedMonthDayRecurrence);
       }
 
       transactionsService.add(newTran, rule);
@@ -83,25 +86,25 @@
 
     function _updateTransaction() {
       var rule = '';
-      if (self.useRecurrence) {
-        rule = recurrenceParser.toRule(self.selectedRecurrencePeriod.key, self.selectedWeekDayRecurrence.short, self.selectedMonthDayRecurrence);
+      if (_this.useRecurrence) {
+        rule = recurrenceParser.toRule(_this.selectedRecurrencePeriod.key, _this.selectedWeekDayRecurrence.short, _this.selectedMonthDayRecurrence);
       }
 
-      transactionsService.update(self.transaction, rule);
+      transactionsService.update(_this.transaction, rule);
     }
 
     function _delete() {
       var confirmPopup = $ionicPopup.confirm({
         title: 'NO UNDO',
-        template: 'Are you sure you want to delete this transaction?'
+        template: 'Are you sure you want to delete this transaction?',
       });
-      
-      confirmPopup.then(function (res) {
+
+      confirmPopup.then(function(res) {
         if (res) {
-          transactionsService.remove(self.transaction);
+          transactionsService.remove(_this.transaction);
           _goBack();
         }
-      });      
+      });
     }
 
     function _goBack() {
@@ -114,51 +117,54 @@
     }
 
     function _initializeDefaultRecurrence() {
-      self.selectedRecurrencePeriod = self.recurrencePeriods[0];
-      self.selectedWeekDayRecurrence = _.findWhere(self.weekDayRecurrence, { short: self.transaction.date.format('ddd') });
-      self.selectedMonthDayRecurrence = self.transaction.date.date();
+      _this.selectedRecurrencePeriod = _this.recurrencePeriods[0];
+      _this.selectedWeekDayRecurrence = _.findWhere(_this.weekDayRecurrence, {short: _this.transaction.date.format('ddd')});
+      _this.selectedMonthDayRecurrence = _this.transaction.date.date();
     }
 
     function _initializeExistingRecurrence(recurrence) {
       if (!recurrence) {
         return;
       }
+
       var recRule = recurrenceParser.fromRule(recurrence.rule);
 
       if (recRule.timeSpan.type === 'week') {
         if (recRule.timeSpan.value === 1) {
-          self.selectedRecurrencePeriod = self.recurrencePeriods[0];
+          _this.selectedRecurrencePeriod = _this.recurrencePeriods[0];
         } else {
-          self.selectedRecurrencePeriod = self.recurrencePeriods[1];
+          _this.selectedRecurrencePeriod = _this.recurrencePeriods[1];
         }
-        self.selectedWeekDayRecurrence = _.findWhere(self.weekDayRecurrence, { short: recRule.day });
+
+        _this.selectedWeekDayRecurrence = _.findWhere(_this.weekDayRecurrence, {short: recRule.day});
       } else {
-        self.selectedRecurrencePeriod = self.recurrencePeriods[2];
-        self.selectedMonthDayRecurrence = recRule.day;
+        _this.selectedRecurrencePeriod = _this.recurrencePeriods[2];
+        _this.selectedMonthDayRecurrence = recRule.day;
       }
 
-      self.useRecurrence = true;
+      _this.useRecurrence = true;
     }
 
     function getRecurrenceText() {
-      if (!self.transaction.recurrence) {
+      if (!_this.transaction.recurrence) {
         return '';
       }
-      var rule = self.transaction.recurrence.rule;
+
+      var rule = _this.transaction.recurrence.rule;
       var parts = rule.split(' ');
       var text = '';
       var selectedWeekDayRecurrence = '';
-      if (self.selectedRecurrencePeriod && self.selectedRecurrencePeriod.key === '1W') {
+      if (_this.selectedRecurrencePeriod && _this.selectedRecurrencePeriod.key === '1W') {
         text = 'Weekly on ';
-        selectedWeekDayRecurrence = _.findWhere(self.weekDayRecurrence, { short: parts[1] });
+        selectedWeekDayRecurrence = _.findWhere(_this.weekDayRecurrence, {short: parts[1]});
         text += selectedWeekDayRecurrence.long;
-      } else if (self.selectedRecurrencePeriod && self.selectedRecurrencePeriod.key === '2W') {
+      } else if (_this.selectedRecurrencePeriod && _this.selectedRecurrencePeriod.key === '2W') {
         text = 'By-Weekly on ';
-        selectedWeekDayRecurrence = _.findWhere(self.weekDayRecurrence, { short: parts[1] });
+        selectedWeekDayRecurrence = _.findWhere(_this.weekDayRecurrence, {short: parts[1]});
         text += selectedWeekDayRecurrence.long;
       } else {
         text = 'Monthly on the ';
-        var selectedMonthDayRecurrence = self.transaction.date.date();
+        var selectedMonthDayRecurrence = _this.transaction.date.date();
         text += selectedMonthDayRecurrence;
       }
     }

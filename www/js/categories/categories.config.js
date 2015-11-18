@@ -1,6 +1,6 @@
 /* global angular */
 
-(function () {
+(function() {
   'use strict';
   angular.module('pf.categories')
     .config(configuration);
@@ -8,42 +8,53 @@
   configuration.$inject = ['$stateProvider', '$urlRouterProvider', 'CONST'];
   function configuration($stateProvider, $urlRouterProvider, CONST) {
 
+     //
+     //views: {
+     //     'tab-charts': {
+     //       templateUrl: 'templates/charts.html',
+     //       controller: 'ChartsCtrl as charts',
+     //     },
+     //   },
+
     $stateProvider
-      .state('category', {
+      .state('tabs.category', {
         url: '/category',
-        template: '<ion-nav-view></ion-nav-view>',
+        views:{
+          'tab-settings':{
+            template:'<ion-nav-view></ion-nav-view>',
+          },
+        },
         abstract: true,
         resolve: {
           user: _userResolver,
-          categories: _categoriesResolver
-        }
+          categories: _categoriesResolver,
+        },
       })
-      .state('category.list', {
+      .state('tabs.category.list', {
         url: '/list',
         controller: 'CategoriesCtrl as catCtrl',
-        templateUrl: 'templates/categories/list.html'
+        templateUrl: 'templates/categories/list.html',
       })
-      .state('category.add', {
+      .state('tabs.category.add', {
         url: '/add',
         controller: 'CategoryCtrl as catCtrl',
         templateUrl: 'templates/categories/edit.html',
         resolve: {
-          category: _addCategoryResolver
-        }
+          category: _addCategoryResolver,
+        },
       })
-      .state('category.edit', {
+      .state('tabs.category.edit', {
         url: '/edit/:id',
         controller: 'CategoryCtrl as catCtrl',
         templateUrl: 'templates/categories/edit.html',
         resolve: {
-          category: _editCategoryResolver
-        }
+          category: _editCategoryResolver,
+        },
       });
 
     $urlRouterProvider.otherwise('/category/list');
 
-
-    _categoriesResolver.$inject = ['$stateParams', 'categoriesDatacontext']
+    _categoriesResolver.$inject = ['$stateParams', 'categoriesDatacontext'];
     function _categoriesResolver($stateParams, categoriesDatacontext) {
       return categoriesDatacontext.list();
     }
@@ -56,7 +67,7 @@
     function _addCategoryResolver() {
       return {
         name: '',
-        type: CONST.TransactionType.Expense
+        type: CONST.TransactionType.Expense,
       };
     }
 

@@ -59,11 +59,11 @@
         </ion-list>
     </ion-content>
     <a class="button button-balanced round-button" ng-if="dash.selectedTransactionType === dash.TransactionTypes.Income"
-       ui-sref="transaction.add({transactionType: 'income'})">
+       ui-sref="tabs.transaction.add({transactionType: 'income'})">
         <div class="icon plus-icon"></div>
     </a>
     <a class="button button-assertive round-button" ng-if="dash.selectedTransactionType === dash.TransactionTypes.Expense"
-       ui-sref="transaction.add({transactionType: 'expense'})">
+       ui-sref="tabs.transaction.add({transactionType: 'expense'})">
         <div class="icon minus-icon"></div>
     </a>
 </ion-view>

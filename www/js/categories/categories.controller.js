@@ -1,29 +1,26 @@
-(function () {
+(function() {
   'use strict';
 
   angular.module('pf.categories')
     .controller('CategoriesCtrl', CategoriesCtrl);
 
-
-  CategoriesCtrl.$inject = ['$state', 'CONST', 'categoriesDatacontext', 'logging'];
-  function CategoriesCtrl($state, CONST, categoriesDatacontext, logging) {
-    logging.debug('entering CategoriesCtrl');
-    
-    var self = this;
+  CategoriesCtrl.$inject = ['$state', '$ionicListDelegate', 'categoriesDatacontext', 'logging'];
+  function CategoriesCtrl($state, $ionicListDelegate, categoriesDatacontext, logging) {
+    var _this = this;
     this.categories = [];
 
     this.edit = _edit;
 
     activate();
     function activate() {
-      categoriesDatacontext.list().then(function (result) {
-        self.categories = result;
+      categoriesDatacontext.list().then(function(result) {
+        _this.categories = result;
       });
     }
 
     function _edit(category) {
-      logging.debug('Clicked on edit Category.', category);
-      $state.go('category.edit', { id: category.$id });
+      $state.go('tabs.category.edit', {id: category.$id});
+      $ionicListDelegate.closeOptionButtons();
     }
   }
 })();

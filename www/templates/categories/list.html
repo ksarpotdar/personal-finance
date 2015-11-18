@@ -1,21 +1,21 @@
 <ion-view view-title="Categories">
   <ion-content>
 
-    <a class="button button-block button-balanced" ui-sref='category.add()'>Add Category</a>
+    <a class="button button-block button-balanced" ui-sref='tabs.category.add()'>Add Category</a>
     <ion-list show-delete="false" can-swipe="true">
       <ion-item ng-repeat="category in catCtrl.categories | filter:{deleted: '!'}" class="transaction-item">
         <div class="category-name">
-          <div>{{::category.name}}</div>          
+          <div>{{::category.name}}</div>
         </div>
 
         <div class="category-type">
-            {{::category.type}}          
+            {{::category.type}}
         </div>
 
         <ion-option-button class="button-info" ng-click="catCtrl.edit(category)">
           Edit
         </ion-option-button>
-        <ion-delete-button class="ion-minus-circled" ng-click="items.splice($index, 1)">          
+        <ion-delete-button class="ion-minus-circled" ng-click="items.splice($index, 1)">
         </ion-delete-button>
 
       </ion-item>

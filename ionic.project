@@ -4,6 +4,7 @@
   "gulpStartupTasks": [
     "sass",
     "jshint",
+    "combine-scripts-css",
     "watch"
   ],
   "watchPatterns": [

@@ -1,6 +1,6 @@
 /* global angular */
 
-(function () {
+(function() {
   'use strict';
 
   angular.module('pf.transactions')
@@ -10,39 +10,44 @@
   function configuration($stateProvider, $urlRouterProvider, CONST) {
 
     $stateProvider
-      .state('transaction', {
+      .state('tabs.transaction', {
+
         url: '/transaction',
-        template: '<ion-nav-view></ion-nav-view>',
+        views:{
+          'tab-dashboard':{
+            template:'<ion-nav-view></ion-nav-view>',
+          },
+        },
+
         abstract: true,
         resolve: {
           user: _userResolver,
-          categories: _categoriesResolver
-        }
+          categories: _categoriesResolver,
+        },
       })
-      .state('transaction.add', {
+      .state('tabs.transaction.add', {
         url: '/add/:transactionType',
         controller: 'TransactionCtrl as tran',
         templateUrl: 'templates/transactions/edit.html',
         resolve: {
-          transaction: _addTransactionResolver
-        }
+          transaction: _addTransactionResolver,
+        },
       })
-      .state('transaction.edit', {
+      .state('tabs.transaction.edit', {
         url: '/edit/:id',
         controller: 'TransactionCtrl as tran',
         templateUrl: 'templates/transactions/edit.html',
         resolve: {
-          transaction: _editTransactionResolver
-        }
+          transaction: _editTransactionResolver,
+        },
       });
 
     $urlRouterProvider.otherwise('/dashboard');
 
-
     _categoriesResolver.$inject = ['$stateParams', 'categoriesDatacontext'];
     function _categoriesResolver($stateParams, categoriesDatacontext) {
-      return categoriesDatacontext.list().then(function (categories) {
-        return _.filter(categories, function (c) { return !c.deleted; });
+      return categoriesDatacontext.list().then(function(categories) {
+        return _.filter(categories, function(c) { return !c.deleted; });
       });
     }
 
@@ -54,18 +59,18 @@
     _addTransactionResolver.$inject = ['$stateParams'];
     function _addTransactionResolver($stateParams) {
       return {
-        amount: 0,
+        amount: null,
         category: '',
         currency: '$',
         date: moment(),
-        type: $stateParams.transactionType
+        type: $stateParams.transactionType,
       };
     }
 
     _editTransactionResolver.$inject = ['$stateParams', 'transactionsDatacontext'];
     function _editTransactionResolver($stateParams, transactionsDatacontext) {
       var transactionId = $stateParams.id;
-      return transactionsDatacontext.single(transactionId);      
+      return transactionsDatacontext.single(transactionId);
     }
   }
 })();

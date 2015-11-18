@@ -2,10 +2,10 @@
   'use strict';
 
   angular.module('pf.dashboard')
-      .controller('DashboardCtrl', DashboardCtrl);
+    .controller('DashboardCtrl', DashboardCtrl);
 
-  DashboardCtrl.$inject = ['$state', '$ionicListDelegate', 'CONST', 'transactionsService', 'TimeFrameService'];
-  function DashboardCtrl($state, $ionicListDelegate, CONST, transactionsService, timeFrame) {
+  DashboardCtrl.$inject = ['$scope', '$state', '$ionicListDelegate', 'CONST', 'transactionsService', 'TimeFrameService'];
+  function DashboardCtrl($scope, $state, $ionicListDelegate, CONST, transactionsService, timeFrame) {
     var _this = this;
     this.currentSold = 0;
     this.TransactionTypes = CONST.TransactionType;
@@ -23,6 +23,12 @@
     this.getNextMonthName = getNextMonthName;
     this.getViewTitle = getViewTitle;
 
+    $scope.$on('$stateChangeSuccess', function(evt, toState) {
+      if (toState.name === 'tabs.dashboard') {
+        _refreshCurrentSold();
+      }
+    });
+
     activate();
     function activate() {
       timeFrame.init();
@@ -38,7 +44,7 @@
     }
 
     function editTransaction(transaction) {
-      $state.go('transaction.edit', {id: transaction.$id});
+      $state.go('tabs.transaction.edit', {id: transaction.$id});
       $ionicListDelegate.closeOptionButtons();
     }
 
@@ -66,10 +72,10 @@
 
     function _refreshData(start, end) {
       transactionsService.list(start, end)
-          .then(function(result) {
-            _this.transactions = result;
-            _refreshCurrentSold();
-          });
+        .then(function(result) {
+          _this.transactions = result;
+          _refreshCurrentSold();
+        });
     }
 
     function _sortTransactions(val) {
@@ -83,9 +89,9 @@
     function _refreshCurrentSold(transaction) {
       if (!transaction) {
         _this.currentSold = _.reduce(_this.transactions,
-            function(sum, val) {
-              return sum + val.amountSigned;
-            }, 0);
+          function(sum, val) {
+            return sum + val.amountSigned;
+          }, 0);
       } else {
         _this.currentSold += transaction.amountSigned;
       }
@@ -93,14 +99,14 @@
 
     function _refreshTransactionCollections() {
       _this.expenseTransactions = _(_this.transactions)
-          .where({type: CONST.TransactionType.Expense})
-          .sortBy('date')
-          .value();
+        .where({type: CONST.TransactionType.Expense})
+        .sortBy('date')
+        .value();
 
       _this.incomeTransactions = _(_this.transactions)
-          .where({type: CONST.TransactionType.Income})
-          .sortBy('date')
-          .value();
+        .where({type: CONST.TransactionType.Income})
+        .sortBy('date')
+        .value();
     }
   }
 })();

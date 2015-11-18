@@ -8,14 +8,15 @@
   categoriesDatacontext.$inject = ['$q', '$timeout', '$window', '$firebaseArray', '$firebaseUtils', 'Auth', 'CONST', 'errors'];
   function categoriesDatacontext($q, $timeout, $window, $firebaseArray, $firebaseUtils, Auth, CONST, errors) {
     var user = null,
-        categoryRef = null,
-        categoriesArr = null,
-        _categoriesLoaded = false,
-        ref = new $window.Firebase(CONST.FirebaseUrl);
+      categoryRef = null,
+      categoriesArr = null,
+      _categoriesLoaded = false,
+      ref = new $window.Firebase(CONST.FirebaseUrl),
+      _this = this;
 
     _activate();
 
-    return {
+    var api = {
       list: getCategories,
       sumByCategory: sumByCategory,
       get: _getById,
@@ -23,7 +24,9 @@
       categoryRef: categoryRef,
     };
 
-    function _activate(user) {
+    return _wrapApi(api);
+
+    function _activate() {
       user = Auth.resolveUser();
 
       if (!user) {
@@ -34,10 +37,10 @@
       categoriesArr = _createCategoryFirebaseArray()(categoryRef);
 
       categoriesArr
-          .$loaded()
-          .then(function() {
-            _categoriesLoaded = true;
-          });
+        .$loaded()
+        .then(function() {
+          _categoriesLoaded = true;
+        });
     }
 
     function sumByCategory() {
@@ -60,10 +63,10 @@
     function addTransactionToCategory(category, transactionKey, transaction) {
       var categoryTransactionRef = categoryRef.child(category.$id).child('transactions');
       categoryTransactionRef.child(transactionKey)
-          .setWithPriority({
-            amount: transaction.amount,
-            date: transaction.date,
-          }, transaction.date);
+        .setWithPriority({
+          amount: transaction.amount,
+          date: transaction.date,
+        }, transaction.date);
     }
 
     function _getById(id) {
@@ -120,13 +123,13 @@
           }
 
           var _this = this,
-              item = _this._resolveItem(indexOrItem),
-              key = _this.$keyAt(item);
+            item = _this._resolveItem(indexOrItem),
+            key = _this.$keyAt(item);
 
           if (key !== null) {
             var ref = _this.$ref().ref().child(key),
-                updateFields = pickFields(item, listOfFields),
-                data = $firebaseUtils.toJSON(updateFields);
+              updateFields = _pickFields(item, listOfFields),
+              data = $firebaseUtils.toJSON(updateFields);
 
             return $firebaseUtils.doSet(ref, data).then(function() {
               _this.$$notify('child_changed', key);
@@ -138,7 +141,7 @@
         },
       });
 
-      function pickFields(data, fields) {
+      function _pickFields(data, fields) {
         var out = {};
         angular.forEach(fields, function(k) {
           out[k] = data.hasOwnProperty(k) ? data[k] : null;
@@ -146,6 +149,27 @@
 
         return out;
       }
+    }
+
+    function _wrapApi(obj) {
+      for (var prop in obj) {
+        if (api.hasOwnProperty(prop)) {
+          obj[prop] = _ensureInitialized(api[prop]);
+        }
+      }
+
+      return obj;
+    }
+
+    function _ensureInitialized(func) {
+      return function() {
+        if (!user) {
+          user = Auth.resolveUser();
+          _activate();
+        }
+
+        return func.apply(_this, arguments);
+      };
     }
   }
 })();

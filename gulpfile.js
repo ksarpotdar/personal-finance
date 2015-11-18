@@ -14,6 +14,7 @@ var gulp = require('gulp'),
   paths = {
     sass: ['./scss/**/*.scss'],
     js: ['./www/js/*.js'],
+    html: ['./www/templates/**/*.html'],
   };
 
 gulp.task('tests', function(done) {
@@ -77,8 +78,9 @@ gulp.task('sass', function(done) {
 gulp.task('watch', function() {
   gulp.watch(paths.sass, ['sass']);
   gulp.watch(paths.js, ['jshint']);
+  gulp.watch(paths.html, ['combine-scripts-css']);
 });
 
-gulp.task('default', ['sass', 'jshint', 'tpl', 'combine-scripts-css']);
-gulp.task('dev', ['sass', 'jshint', 'tpl', 'combine-scripts-css']);
+gulp.task('default', ['sass', 'jshint', 'combine-scripts-css']);
+gulp.task('dev', ['sass', 'jshint', 'combine-scripts-css']);
 gulp.task('prod', ['sass', 'jshint', 'combine-scripts-css', 'copy-images', 'copy-fonts']);
